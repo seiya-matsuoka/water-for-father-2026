@@ -12,15 +12,24 @@
   let height = 0;
   let dpr = 1;
 
-  const pointer = { active: false };
+  const pointer = { active: false, lastX: 0, lastY: 0, lastTime: 0 };
   const motion = { x: 0, y: 0, targetX: 0, targetY: 0, vx: 0, vy: 0 };
-  const overlayMotion = { x: 0, y: 0, vx: 0, vy: 0 };
+  const overlayMotion = {
+    x: 0,
+    y: 0,
+    targetX: 0,
+    targetY: 0,
+    vx: 0,
+    vy: 0,
+    flow: 0,
+  };
 
   const state = {
     tiles: [],
     refs: [],
     tAnchor: null,
     overlayPatches: [],
+    ripples: [],
   };
 
   const palette = {
@@ -46,8 +55,6 @@
     seamShadow: "rgba(157, 168, 176, 0.16)",
     grainDark: "rgba(102, 113, 123, 0.26)",
     grainLight: "rgba(255, 255, 255, 0.30)",
-    tBlue: "rgba(196, 235, 255, 0.7)",
-    tLavender: "rgba(195, 185, 241, 0.34)",
   };
 
   const cornerPool = [
@@ -310,33 +317,30 @@
 
   function buildOverlayPatches() {
     state.overlayPatches = [];
-    const count = 10;
+    const count = 12;
     for (let i = 0; i < count; i += 1) {
       state.overlayPatches.push({
-        type:
-          Math.random() < 0.45
-            ? "radial"
-            : Math.random() < 0.6
-              ? "linear"
-              : "membrane",
-        x: rand(0.06, 0.94),
-        y: rand(0.06, 0.94),
-        w: rand(0.28, 0.56),
-        h: rand(0.2, 0.48),
-        alpha: rand(0.035, 0.08),
-        angle: rand(-Math.PI * 0.7, Math.PI * 0.7),
+        x: rand(0.05, 0.95),
+        y: rand(0.04, 0.96),
+        w: rand(0.22, 0.52),
+        h: rand(0.18, 0.44),
+        alpha: rand(0.045, 0.11),
+        angle: rand(-Math.PI * 0.75, Math.PI * 0.75),
         seed: rand(0, Math.PI * 2),
+        spread: rand(0.7, 1.25),
         c0: choose([
-          "rgba(216,244,255,0.20)",
-          "rgba(202,236,255,0.18)",
-          "rgba(190,230,255,0.16)",
-          "rgba(182,224,251,0.15)",
+          "rgba(216,244,255,0.22)",
+          "rgba(202,236,255,0.20)",
+          "rgba(190,230,255,0.18)",
+          "rgba(182,224,251,0.17)",
+          "rgba(198,233,255,0.21)",
         ]),
         c1: choose([
-          "rgba(152,214,255,0.10)",
-          "rgba(136,205,248,0.09)",
-          "rgba(170,222,255,0.08)",
-          "rgba(205,237,255,0.06)",
+          "rgba(152,214,255,0.14)",
+          "rgba(136,205,248,0.12)",
+          "rgba(170,222,255,0.11)",
+          "rgba(205,237,255,0.08)",
+          "rgba(172,220,255,0.10)",
         ]),
       });
     }
@@ -585,13 +589,44 @@
 
     buildTiles();
     buildOverlayPatches();
+    state.ripples = [];
     paintBase();
     paintGrain();
   }
 
+  function addRipple(x, y, strength = 1) {
+    state.ripples.push({
+      x,
+      y,
+      r: 10,
+      alpha: clamp(0.06 + strength * 0.045, 0.06, 0.16),
+      thickness: clamp(20 + strength * 16, 18, 36),
+      stretchX: 1 + strength * 0.25,
+      stretchY: 1 - strength * 0.1,
+      vx: rand(-0.05, 0.05),
+      vy: rand(-0.03, 0.03),
+    });
+    if (state.ripples.length > 14) state.ripples.shift();
+  }
+
+  function updateRipples() {
+    for (let i = state.ripples.length - 1; i >= 0; i -= 1) {
+      const ripple = state.ripples[i];
+      ripple.r += 2.6;
+      ripple.alpha *= 0.972;
+      ripple.x += ripple.vx;
+      ripple.y += ripple.vy;
+      ripple.stretchX += 0.002;
+      ripple.stretchY += 0.001;
+      if (ripple.alpha < 0.008 || ripple.r > Math.max(width, height) * 0.42) {
+        state.ripples.splice(i, 1);
+      }
+    }
+  }
+
   function updateMotion(time) {
-    motion.vx += (motion.targetX - motion.x) * 0.04;
-    motion.vy += (motion.targetY - motion.y) * 0.04;
+    motion.vx += (motion.targetX - motion.x) * 0.042;
+    motion.vy += (motion.targetY - motion.y) * 0.042;
     motion.vx *= 0.84;
     motion.vy *= 0.84;
     motion.x += motion.vx;
@@ -602,12 +637,62 @@
       motion.targetY = Math.cos(time * 0.00015) * 4.2;
     }
 
-    overlayMotion.vx += (motion.targetX * 1.55 - overlayMotion.x) * 0.032;
-    overlayMotion.vy += (motion.targetY * 1.45 - overlayMotion.y) * 0.032;
+    overlayMotion.targetX =
+      motion.targetX * 2.7 + Math.sin(time * 0.0009) * 5.5;
+    overlayMotion.targetY =
+      motion.targetY * 2.3 + Math.cos(time * 0.00076) * 4.2;
+    overlayMotion.vx += (overlayMotion.targetX - overlayMotion.x) * 0.055;
+    overlayMotion.vy += (overlayMotion.targetY - overlayMotion.y) * 0.055;
     overlayMotion.vx *= 0.9;
     overlayMotion.vy *= 0.9;
-    overlayMotion.x += overlayMotion.vx + Math.sin(time * 0.00044) * 0.05;
-    overlayMotion.y += overlayMotion.vy + Math.cos(time * 0.00036) * 0.045;
+    overlayMotion.x += overlayMotion.vx;
+    overlayMotion.y += overlayMotion.vy;
+    overlayMotion.flow +=
+      0.01 + Math.abs(overlayMotion.vx + overlayMotion.vy) * 0.0007;
+
+    updateRipples();
+  }
+
+  function drawRippleField(time) {
+    ctx.save();
+    ctx.globalCompositeOperation = "screen";
+
+    state.ripples.forEach((ripple, index) => {
+      ctx.save();
+      ctx.translate(
+        ripple.x + overlayMotion.x * 0.18,
+        ripple.y + overlayMotion.y * 0.16,
+      );
+      ctx.scale(ripple.stretchX, ripple.stretchY);
+      const phase = time * 0.001 + index * 0.45;
+      const grad = ctx.createRadialGradient(
+        0,
+        0,
+        ripple.r * 0.22,
+        0,
+        0,
+        ripple.r + ripple.thickness,
+      );
+      grad.addColorStop(0, "rgba(255,255,255,0)");
+      grad.addColorStop(0.36, `rgba(236,248,255,${ripple.alpha * 0.35})`);
+      grad.addColorStop(0.58, `rgba(186,227,255,${ripple.alpha * 0.54})`);
+      grad.addColorStop(0.74, `rgba(224,245,255,${ripple.alpha * 0.28})`);
+      grad.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(0, 0, ripple.r + ripple.thickness, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.rotate(Math.sin(phase) * 0.12);
+      ctx.strokeStyle = `rgba(210,239,255,${ripple.alpha * 0.16})`;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, ripple.r * 0.94, ripple.r * 0.62, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    });
+
+    ctx.restore();
   }
 
   function drawOverlay(time) {
@@ -615,85 +700,110 @@
     ctx.globalCompositeOperation = "screen";
 
     state.overlayPatches.forEach((patch, index) => {
-      const sway = Math.sin(time * 0.00024 + patch.seed + index * 0.31);
-      const sway2 = Math.cos(time * 0.00019 + patch.seed * 1.7 + index * 0.23);
-      const dx = sway * width * 0.024 + overlayMotion.x * 0.64;
-      const dy = sway2 * height * 0.022 + overlayMotion.y * 0.6;
+      const sway = Math.sin(
+        time * 0.00034 + patch.seed + index * 0.31 + overlayMotion.flow * 0.4,
+      );
+      const sway2 = Math.cos(
+        time * 0.00028 +
+          patch.seed * 1.7 +
+          index * 0.23 -
+          overlayMotion.flow * 0.3,
+      );
+      const drift = Math.sin(time * 0.0007 + patch.seed) * 0.4;
+      const dx = sway * width * 0.03 + overlayMotion.x * 0.92;
+      const dy = sway2 * height * 0.028 + overlayMotion.y * 0.86;
       const px = patch.x * width + dx;
       const py = patch.y * height + dy;
-      const pw = patch.w * width;
-      const ph = patch.h * height;
+      const pw = patch.w * width * patch.spread;
+      const ph = patch.h * height * patch.spread;
 
-      let grad;
-      if (patch.type === "radial") {
-        grad = ctx.createRadialGradient(px, py, 0, px, py, Math.max(pw, ph));
-        grad.addColorStop(0, patch.c0);
-        grad.addColorStop(0.46, patch.c1);
-        grad.addColorStop(1, "rgba(255,255,255,0)");
-      } else if (patch.type === "linear") {
-        const x1 = px + Math.cos(patch.angle) * pw * 0.7;
-        const y1 = py + Math.sin(patch.angle) * ph * 0.7;
-        const x2 = px - Math.cos(patch.angle) * pw * 0.7;
-        const y2 = py - Math.sin(patch.angle) * ph * 0.7;
-        grad = ctx.createLinearGradient(x1, y1, x2, y2);
-        grad.addColorStop(0, "rgba(255,255,255,0)");
-        grad.addColorStop(0.18, patch.c1);
-        grad.addColorStop(0.48, patch.c0);
-        grad.addColorStop(0.82, patch.c1);
-        grad.addColorStop(1, "rgba(255,255,255,0)");
-      } else {
-        grad = ctx.createRadialGradient(
-          px - pw * 0.12,
-          py - ph * 0.08,
-          0,
-          px,
-          py,
-          Math.max(pw, ph) * 1.1,
-        );
-        grad.addColorStop(0, "rgba(228,246,255,0.16)");
-        grad.addColorStop(0.28, "rgba(196,231,255,0.10)");
-        grad.addColorStop(0.62, "rgba(157,214,249,0.06)");
-        grad.addColorStop(1, "rgba(255,255,255,0)");
-      }
-
-      ctx.fillStyle = grad;
+      const membrane = ctx.createRadialGradient(
+        px - pw * 0.14,
+        py - ph * 0.1,
+        0,
+        px,
+        py,
+        Math.max(pw, ph) * 1.2,
+      );
+      membrane.addColorStop(0, patch.c0);
+      membrane.addColorStop(0.22, `rgba(234,248,255,${patch.alpha * 0.74})`);
+      membrane.addColorStop(0.48, patch.c1);
+      membrane.addColorStop(0.78, "rgba(178,226,255,0.028)");
+      membrane.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = membrane;
       ctx.fillRect(px - pw, py - ph, pw * 2, ph * 2);
 
-      // subtle liquid ribbon highlight
       ctx.save();
       ctx.translate(px, py);
-      ctx.rotate(patch.angle + sway * 0.08);
-      const ribbon = ctx.createLinearGradient(-pw * 0.55, 0, pw * 0.55, 0);
+      ctx.rotate(patch.angle + sway * 0.22 + drift * 0.09);
+
+      const ribbon = ctx.createLinearGradient(-pw * 0.75, 0, pw * 0.75, 0);
       ribbon.addColorStop(0, "rgba(255,255,255,0)");
-      ribbon.addColorStop(0.32, "rgba(214,239,255,0.02)");
-      ribbon.addColorStop(0.5, "rgba(227,246,255,0.06)");
-      ribbon.addColorStop(0.68, "rgba(184,226,252,0.03)");
+      ribbon.addColorStop(0.18, "rgba(206,239,255,0.018)");
+      ribbon.addColorStop(0.38, "rgba(222,246,255,0.062)");
+      ribbon.addColorStop(0.5, "rgba(240,251,255,0.092)");
+      ribbon.addColorStop(0.62, "rgba(186,229,255,0.048)");
+      ribbon.addColorStop(0.82, "rgba(214,241,255,0.018)");
       ribbon.addColorStop(1, "rgba(255,255,255,0)");
       ctx.fillStyle = ribbon;
       ctx.beginPath();
-      ctx.moveTo(-pw * 0.56, -ph * 0.14);
+      ctx.moveTo(-pw * 0.82, -ph * 0.18);
       ctx.bezierCurveTo(
-        -pw * 0.12,
-        -ph * (0.12 + sway * 0.05),
-        pw * 0.14,
-        ph * (0.08 + sway2 * 0.05),
-        pw * 0.56,
-        -ph * 0.04,
+        -pw * 0.36,
+        -ph * (0.24 + sway * 0.14),
+        -pw * 0.1,
+        ph * (0.22 + sway2 * 0.1),
+        pw * 0.22,
+        -ph * (0.1 + drift * 0.12),
       );
-      ctx.lineTo(pw * 0.56, ph * 0.1);
       ctx.bezierCurveTo(
-        pw * 0.18,
-        ph * (0.16 + sway2 * 0.05),
-        -pw * 0.18,
-        ph * (0.06 + sway * 0.06),
-        -pw * 0.56,
-        ph * 0.18,
+        pw * 0.48,
+        -ph * (0.28 + sway * 0.1),
+        pw * 0.56,
+        ph * (0.22 + sway2 * 0.08),
+        pw * 0.84,
+        ph * 0.04,
+      );
+      ctx.lineTo(pw * 0.84, ph * 0.22);
+      ctx.bezierCurveTo(
+        pw * 0.36,
+        ph * (0.34 + sway * 0.08),
+        0,
+        ph * (0.1 + sway2 * 0.1),
+        -pw * 0.82,
+        ph * 0.24,
       );
       ctx.closePath();
       ctx.fill();
+
+      const caustic = ctx.createLinearGradient(
+        -pw * 0.6,
+        -ph * 0.2,
+        pw * 0.6,
+        ph * 0.2,
+      );
+      caustic.addColorStop(0, "rgba(255,255,255,0)");
+      caustic.addColorStop(0.44, "rgba(242,252,255,0.05)");
+      caustic.addColorStop(0.5, "rgba(255,255,255,0.09)");
+      caustic.addColorStop(0.56, "rgba(191,233,255,0.05)");
+      caustic.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.strokeStyle = caustic;
+      ctx.lineWidth = Math.max(10, pw * 0.05);
+      ctx.beginPath();
+      ctx.moveTo(-pw * 0.74, ph * (-0.05 + sway * 0.08));
+      ctx.bezierCurveTo(
+        -pw * 0.34,
+        ph * (0.3 + sway2 * 0.1),
+        pw * 0.08,
+        ph * (-0.26 + sway * 0.08),
+        pw * 0.72,
+        ph * (0.12 + sway2 * 0.08),
+      );
+      ctx.stroke();
       ctx.restore();
     });
 
+    drawRippleField(time);
     ctx.restore();
   }
 
@@ -751,6 +861,8 @@
     const ny = (y / height - 0.5) * 2;
     motion.targetX = clamp(nx * 11, -11, 11);
     motion.targetY = clamp(ny * 9, -9, 9);
+    overlayMotion.targetX = clamp(nx * 26, -26, 26);
+    overlayMotion.targetY = clamp(ny * 22, -22, 22);
   }
 
   function preventTouchDefault(event) {
@@ -764,12 +876,27 @@
 
   canvas.addEventListener("pointerdown", (event) => {
     canvas.setPointerCapture(event.pointerId);
+    pointer.lastX = event.clientX;
+    pointer.lastY = event.clientY;
+    pointer.lastTime = performance.now();
     handlePointer(event.clientX, event.clientY, true);
+    addRipple(event.clientX, event.clientY, 0.8);
   });
 
   canvas.addEventListener("pointermove", (event) => {
     if (!pointer.active) return;
+    const now = performance.now();
+    const dt = Math.max(8, now - pointer.lastTime);
+    const dx = event.clientX - pointer.lastX;
+    const dy = event.clientY - pointer.lastY;
+    const speed = Math.sqrt(dx * dx + dy * dy) / dt;
     handlePointer(event.clientX, event.clientY, true);
+    if (Math.abs(dx) + Math.abs(dy) > 6) {
+      addRipple(event.clientX, event.clientY, clamp(speed * 2.6, 0.4, 1.5));
+    }
+    pointer.lastX = event.clientX;
+    pointer.lastY = event.clientY;
+    pointer.lastTime = now;
   });
 
   const releasePointer = () => {
