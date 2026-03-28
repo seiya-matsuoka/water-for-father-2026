@@ -21,10 +21,10 @@ body {
   background:
     radial-gradient(
       circle at 50% 24%,
-      rgba(104, 179, 205, 0.08),
-      transparent 26%
+      rgba(176, 228, 236, 0.12),
+      transparent 30%
     ),
-    linear-gradient(180deg, #02060d 0%, #07111b 42%, #040913 100%);
+    linear-gradient(180deg, #04101a 0%, #0a1621 42%, #07111b 100%);
   font-family:
     Inter,
     system-ui,
@@ -42,10 +42,15 @@ body {
   background:
     radial-gradient(
       circle at 52% 38%,
-      rgba(82, 156, 182, 0.06),
-      transparent 26%
+      rgba(138, 211, 235, 0.1),
+      transparent 28%
     ),
-    linear-gradient(180deg, rgba(3, 9, 16, 0.98), rgba(4, 10, 18, 1));
+    radial-gradient(
+      circle at 50% 76%,
+      rgba(255, 196, 101, 0.06),
+      transparent 24%
+    ),
+    linear-gradient(180deg, rgba(5, 14, 23, 0.98), rgba(7, 16, 26, 1));
 }
 
 #neo-canvas,
@@ -75,57 +80,62 @@ body {
   background:
     radial-gradient(
       circle at 50% 54%,
-      transparent 26%,
-      rgba(2, 6, 12, 0.22) 58%,
-      rgba(0, 0, 0, 0.74) 100%
+      transparent 24%,
+      rgba(4, 10, 18, 0.16) 56%,
+      rgba(0, 0, 0, 0.54) 100%
     ),
     linear-gradient(
       180deg,
-      rgba(0, 0, 0, 0.2),
+      rgba(0, 0, 0, 0.14),
       transparent 18%,
       transparent 82%,
-      rgba(0, 0, 0, 0.32) 100%
+      rgba(0, 0, 0, 0.2) 100%
     );
 }
 
 .neo-haze {
   background:
     radial-gradient(
-      circle at 38% 36%,
-      rgba(215, 228, 236, 0.07),
+      circle at 28% 30%,
+      rgba(245, 251, 255, 0.18),
+      transparent 17%
+    ),
+    radial-gradient(
+      circle at 66% 32%,
+      rgba(173, 239, 244, 0.18),
       transparent 18%
     ),
     radial-gradient(
-      circle at 66% 46%,
-      rgba(139, 189, 214, 0.08),
+      circle at 54% 58%,
+      rgba(192, 240, 227, 0.12),
+      transparent 22%
+    ),
+    radial-gradient(
+      circle at 42% 76%,
+      rgba(220, 232, 240, 0.12),
       transparent 20%
-    ),
-    radial-gradient(
-      circle at 52% 72%,
-      rgba(128, 196, 181, 0.05),
-      transparent 18%
     );
   mix-blend-mode: screen;
-  filter: blur(28px);
-  opacity: 0.78;
+  filter: blur(34px);
+  opacity: 0.92;
 }
 
 .neo-grain {
   background-image:
     repeating-linear-gradient(
       90deg,
-      rgba(255, 255, 255, 0.014) 0,
-      rgba(255, 255, 255, 0.014) 1px,
+      rgba(255, 255, 255, 0.02) 0,
+      rgba(255, 255, 255, 0.02) 1px,
       transparent 1px,
       transparent 5px
     ),
     repeating-linear-gradient(
       0deg,
-      rgba(255, 255, 255, 0.008) 0,
-      rgba(255, 255, 255, 0.008) 1px,
+      rgba(255, 255, 255, 0.012) 0,
+      rgba(255, 255, 255, 0.012) 1px,
       transparent 1px,
       transparent 8px
     );
   mix-blend-mode: soft-light;
-  opacity: 0.08;
+  opacity: 0.1;
 }
