@@ -648,8 +648,6 @@
       (overlayMotion.flowTarget - overlayMotion.flow) * 0.08;
     overlayMotion.flow *= 0.992;
     overlayMotion.flow += 0.004;
-
-    maybeAddAutoRipple(time);
     updateRipples();
   }
 
