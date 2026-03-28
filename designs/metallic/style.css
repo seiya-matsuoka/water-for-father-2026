@@ -30,6 +30,8 @@ body {
 
 .metallic-scene {
   overflow: hidden;
+  touch-action: none;
+  overscroll-behavior: none;
   background:
     radial-gradient(
       circle at 14% 14%,
@@ -58,6 +60,7 @@ body {
   width: 100%;
   height: 100%;
   display: block;
+  touch-action: none;
 }
 
 .metallic-overlay {

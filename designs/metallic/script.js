@@ -1,5 +1,6 @@
 (() => {
   const canvas = document.getElementById("metallic-canvas");
+  const scene = document.querySelector(".metallic-scene");
   const ctx = canvas.getContext("2d");
 
   const state = {
@@ -7,6 +8,7 @@
     height: 0,
     dpr: 1,
     pointer: { x: 0, y: 0, active: false },
+    pointerId: null,
     orbit: { x: 0, y: 0 },
     rotation: { x: 0, y: 0 },
     velocity: { x: 0, y: 0 },
@@ -174,12 +176,29 @@
   function onPointerDown(event) {
     const point = getPoint(event);
     state.pointer.active = true;
+    state.pointerId = event.pointerId ?? null;
     state.lastPoint = point;
     state.pointer.x = point.x;
     state.pointer.y = point.y;
+
+    if (event.pointerId != null && canvas.setPointerCapture) {
+      try {
+        canvas.setPointerCapture(event.pointerId);
+      } catch (error) {
+        // Ignore capture failures and keep existing behavior.
+      }
+    }
   }
 
   function onPointerMove(event) {
+    if (
+      state.pointerId != null &&
+      event.pointerId != null &&
+      event.pointerId !== state.pointerId
+    ) {
+      return;
+    }
+
     const point = getPoint(event);
     state.pointer.x = point.x;
     state.pointer.y = point.y;
@@ -200,8 +219,25 @@
     state.lastPoint = point;
   }
 
-  function onPointerUp() {
+  function onPointerUp(event) {
+    if (
+      state.pointerId != null &&
+      event?.pointerId != null &&
+      event.pointerId !== state.pointerId
+    ) {
+      return;
+    }
+
+    if (state.pointerId != null && canvas.releasePointerCapture) {
+      try {
+        canvas.releasePointerCapture(state.pointerId);
+      } catch (error) {
+        // Ignore release failures and fall back to resetting the interaction state.
+      }
+    }
+
     state.pointer.active = false;
+    state.pointerId = null;
     state.lastPoint = null;
   }
 
@@ -882,13 +918,13 @@
   }
 
   window.addEventListener("resize", resize);
-  window.addEventListener("pointerdown", onPointerDown, { passive: true });
-  window.addEventListener("pointermove", onPointerMove, { passive: true });
-  window.addEventListener("pointerup", onPointerUp, { passive: true });
-  window.addEventListener("pointercancel", onPointerUp, { passive: true });
-  window.addEventListener("pointerleave", onPointerUp, { passive: true });
+  canvas.addEventListener("pointerdown", onPointerDown, { passive: true });
+  canvas.addEventListener("pointermove", onPointerMove, { passive: true });
+  canvas.addEventListener("pointerup", onPointerUp, { passive: true });
+  canvas.addEventListener("pointercancel", onPointerUp, { passive: true });
+  canvas.addEventListener("lostpointercapture", onPointerUp, { passive: true });
 
-  window.addEventListener(
+  scene.addEventListener(
     "touchmove",
     (event) => {
       if (state.pointer.active) {
@@ -897,6 +933,8 @@
     },
     { passive: false },
   );
+
+  window.addEventListener("blur", onPointerUp, { passive: true });
 
   resize();
   animationFrameId = window.requestAnimationFrame(animate);
