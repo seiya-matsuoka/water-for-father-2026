@@ -421,6 +421,19 @@
     ];
   }
 
+  function softenOverlayColor(color, alphaFactor = 1, tint = 0) {
+    const match = color.match(
+      /rgba\(([^,]+),\s*([^,]+),\s*([^,]+),\s*([^)]+)\)/,
+    );
+    if (!match) return color;
+
+    const r = Math.round(Number(match[1]) * (1 - tint) + 238 * tint);
+    const g = Math.round(Number(match[2]) * (1 - tint) + 246 * tint);
+    const b = Math.round(Number(match[3]) * (1 - tint) + 252 * tint);
+    const a = clamp(Number(match[4]) * alphaFactor, 0, 1);
+    return `rgba(${r}, ${g}, ${b}, ${a.toFixed(3)})`;
+  }
+
   function drawBackground() {
     const gradient = ctx.createLinearGradient(0, 0, 0, state.height);
     gradient.addColorStop(0, palette.bgTop);
@@ -500,6 +513,11 @@
         (0.032 + i * 0.006);
       const ribbonWidth = state.width * (0.24 + i * 0.05);
       const stops = overlayStops(phase + i * 0.82, 1.2 - i * 0.08);
+      const ribbonStops = [
+        softenOverlayColor(stops[0], 0.22, 0.28),
+        softenOverlayColor(stops[1], 0.26, 0.18),
+        softenOverlayColor(stops[2], 0.24, 0.12),
+      ];
       const grad = ctx.createLinearGradient(
         px - ribbonWidth,
         0,
@@ -507,9 +525,9 @@
         state.height,
       );
       grad.addColorStop(0, "rgba(255,255,255,0)");
-      grad.addColorStop(0.14, stops[0]);
-      grad.addColorStop(0.42, stops[1]);
-      grad.addColorStop(0.72, stops[2]);
+      grad.addColorStop(0.14, ribbonStops[0]);
+      grad.addColorStop(0.42, ribbonStops[1]);
+      grad.addColorStop(0.72, ribbonStops[2]);
       grad.addColorStop(1, "rgba(255,255,255,0)");
 
       ctx.fillStyle = grad;
@@ -535,7 +553,7 @@
       ctx.closePath();
       ctx.fill();
 
-      ctx.strokeStyle = `rgba(246, 252, 255, ${(0.0055 - i * 0.0007).toFixed(4)})`;
+      ctx.strokeStyle = `rgba(240, 248, 252, ${(0.0018 - i * 0.00022).toFixed(4)})`;
       ctx.lineWidth = Math.max(1, state.width * 0.0009);
       ctx.beginPath();
       ctx.moveTo(px - ribbonWidth * 0.04, -state.height * 0.08);
