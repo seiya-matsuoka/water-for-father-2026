@@ -32,8 +32,10 @@
     signCoolGlow: "rgba(175, 239, 245, 0.14)",
     signWarm: "rgba(255, 187, 97, 0.24)",
     signWarmGlow: "rgba(255, 222, 170, 0.14)",
-    signMint: "rgba(132, 223, 194, 0.2)",
-    signMintGlow: "rgba(200, 242, 226, 0.12)",
+    signMint: "rgba(120, 238, 186, 0.24)",
+    signMintGlow: "rgba(207, 249, 223, 0.16)",
+    signLime: "rgba(142, 255, 160, 0.18)",
+    signLimeGlow: "rgba(220, 255, 225, 0.12)",
   };
 
   const microTiles = [];
@@ -89,17 +91,21 @@
           let glow = "rgba(188, 234, 245, 0.055)";
           let bright = false;
 
-          if (glowRoll > 0.58 && glowRoll < 0.82) {
+          if (glowRoll > 0.56 && glowRoll < 0.78) {
             fill = palette.signCool;
             glow = palette.signCoolGlow;
             bright = rand() > 0.56;
-          } else if (glowRoll >= 0.82 && glowRoll < 0.93) {
+          } else if (glowRoll >= 0.78 && glowRoll < 0.89) {
             fill = palette.signWarm;
             glow = palette.signWarmGlow;
             bright = true;
-          } else if (glowRoll >= 0.93) {
+          } else if (glowRoll >= 0.89 && glowRoll < 0.965) {
             fill = palette.signMint;
             glow = palette.signMintGlow;
+            bright = true;
+          } else if (glowRoll >= 0.965) {
+            fill = palette.signLime;
+            glow = palette.signLimeGlow;
             bright = true;
           }
 
@@ -160,8 +166,9 @@
         size: 0.05 + rand() * 0.11,
         phase: rand() * Math.PI * 2,
         speed: 0.18 + rand() * 0.3,
-        warm: rand() > 0.62,
-        mint: rand() > 0.82,
+        warm: rand() > 0.64,
+        mint: rand() > 0.76,
+        lime: rand() > 0.9,
       });
     }
   }
@@ -179,10 +186,10 @@
   }
 
   function setTargetByDelta(dx, dy) {
-    state.targetX = clamp(state.targetX + dx * 0.9, -230, 230);
-    state.targetY = clamp(state.targetY + dy * 0.9, -230, 230);
-    state.velocityX = clamp(dx * 0.13, -10, 10);
-    state.velocityY = clamp(dy * 0.13, -10, 10);
+    state.targetX = clamp(state.targetX + dx * 1.15, -285, 285);
+    state.targetY = clamp(state.targetY + dy * 1.15, -285, 285);
+    state.velocityX = clamp(dx * 0.15, -12, 12);
+    state.velocityY = clamp(dy * 0.15, -12, 12);
   }
 
   function onPointerDown(event) {
@@ -202,8 +209,8 @@
     const elapsed = Math.max(16, now - state.lastMove);
 
     setTargetByDelta(dx, dy);
-    state.velocityX = clamp((dx / elapsed) * 12, -10, 10);
-    state.velocityY = clamp((dy / elapsed) * 12, -10, 10);
+    state.velocityX = clamp((dx / elapsed) * 13.4, -12, 12);
+    state.velocityY = clamp((dy / elapsed) * 13.4, -12, 12);
     state.lastX = event.clientX;
     state.lastY = event.clientY;
     state.lastMove = now;
@@ -221,20 +228,20 @@
     state.drift += delta * 0.00022;
 
     if (!state.drag) {
-      state.targetX += Math.sin(state.drift * 2.05) * 0.14;
-      state.targetY += Math.cos(state.drift * 2.8) * 0.12;
+      state.targetX += Math.sin(state.drift * 2.05) * 0.18;
+      state.targetY += Math.cos(state.drift * 2.8) * 0.16;
       state.velocityX *= Math.pow(0.972, t);
       state.velocityY *= Math.pow(0.972, t);
       state.targetX += state.velocityX * 0.38;
       state.targetY += state.velocityY * 0.38;
-      state.targetX *= Math.pow(0.9985, t);
-      state.targetY *= Math.pow(0.9985, t);
+      state.targetX *= Math.pow(0.9982, t);
+      state.targetY *= Math.pow(0.9982, t);
     }
 
-    state.targetX = clamp(state.targetX, -240, 240);
-    state.targetY = clamp(state.targetY, -240, 240);
-    state.currentX += (state.targetX - state.currentX) * (0.09 * t);
-    state.currentY += (state.targetY - state.currentY) * (0.09 * t);
+    state.targetX = clamp(state.targetX, -295, 295);
+    state.targetY = clamp(state.targetY, -295, 295);
+    state.currentX += (state.targetX - state.currentX) * (0.098 * t);
+    state.currentY += (state.targetY - state.currentY) * (0.098 * t);
   }
 
   function alphaFrom(fill, fallback = 0.16) {
@@ -269,18 +276,18 @@
   function drawAbstractBase() {
     const { width, height } = state;
     const size = Math.max(width, height);
-    const baseShiftX = state.currentX * 0.075;
-    const baseShiftY = state.currentY * 0.055;
+    const baseShiftX = state.currentX * 0.092;
+    const baseShiftY = state.currentY * 0.068;
 
     ctx.save();
     ctx.translate(width * 0.5 + baseShiftX, height * 0.54 + baseShiftY);
     ctx.rotate(-0.34);
 
     const field = ctx.createLinearGradient(0, -size, 0, size);
-    field.addColorStop(0, "rgba(12, 26, 39, 0.82)");
-    field.addColorStop(0.4, "rgba(20, 43, 64, 0.48)");
-    field.addColorStop(0.72, "rgba(24, 45, 62, 0.42)");
-    field.addColorStop(1, "rgba(10, 18, 29, 0.88)");
+    field.addColorStop(0, "rgba(16, 28, 40, 0.84)");
+    field.addColorStop(0.38, "rgba(26, 50, 70, 0.56)");
+    field.addColorStop(0.68, "rgba(26, 48, 64, 0.5)");
+    field.addColorStop(1, "rgba(12, 20, 31, 0.9)");
     ctx.fillStyle = field;
     ctx.fillRect(-size * 1.2, -size * 1.35, size * 2.4, size * 2.7);
 
@@ -307,6 +314,38 @@
       );
       ctx.fill();
       ctx.restore();
+    }
+
+    for (let i = 0; i < 16; i += 1) {
+      const lx =
+        (-0.88 +
+          i * 0.115 +
+          Math.sin(state.time * (0.2 + i * 0.01) + i) * 0.01) *
+        size;
+      const ly =
+        (-0.98 +
+          (i % 8) * 0.24 +
+          Math.cos(state.time * 0.24 + i * 0.4) * 0.01) *
+        size;
+      const lw = size * (0.048 + (i % 3) * 0.018);
+      const lh = size * (0.018 + (i % 4) * 0.008);
+      const lg = ctx.createLinearGradient(lx - lw * 0.5, ly, lx + lw * 0.5, ly);
+      if (i % 4 === 0) {
+        lg.addColorStop(0, "rgba(212, 255, 228, 0)");
+        lg.addColorStop(0.48, "rgba(150, 244, 181, 0.15)");
+        lg.addColorStop(1, "rgba(212, 255, 228, 0)");
+      } else if (i % 3 === 0) {
+        lg.addColorStop(0, "rgba(255, 235, 182, 0)");
+        lg.addColorStop(0.48, "rgba(255, 204, 112, 0.16)");
+        lg.addColorStop(1, "rgba(255, 235, 182, 0)");
+      } else {
+        lg.addColorStop(0, "rgba(204, 240, 255, 0)");
+        lg.addColorStop(0.48, "rgba(134, 220, 249, 0.18)");
+        lg.addColorStop(1, "rgba(204, 240, 255, 0)");
+      }
+      ctx.fillStyle = lg;
+      roundedRect(lx - lw * 0.5, ly - lh * 0.5, lw, lh, lh * 0.5);
+      ctx.fill();
     }
 
     for (const tile of microTiles) {
@@ -390,9 +429,12 @@
       if (node.warm) {
         center = "rgba(255, 221, 150, 0.22)";
         mid = "rgba(255, 176, 86, 0.12)";
+      } else if (node.lime) {
+        center = "rgba(228, 255, 226, 0.18)";
+        mid = "rgba(124, 244, 170, 0.11)";
       } else if (node.mint) {
-        center = "rgba(193, 242, 228, 0.18)";
-        mid = "rgba(102, 216, 186, 0.1)";
+        center = "rgba(203, 247, 231, 0.2)";
+        mid = "rgba(108, 228, 188, 0.11)";
       }
       const radial = ctx.createRadialGradient(gx, gy, 0, gx, gy, radius);
       radial.addColorStop(0, center);
@@ -402,7 +444,7 @@
       ctx.fillRect(gx - radius, gy - radius, radius * 2, radius * 2);
     }
 
-    ctx.fillStyle = "rgba(242, 248, 253, 0.075)";
+    ctx.fillStyle = "rgba(244, 249, 253, 0.06)";
     for (let i = -3; i <= 4; i += 1) {
       const x = i * size * 0.2 + Math.sin(state.time * 0.16 + i) * size * 0.008;
       roundedRect(
@@ -420,25 +462,25 @@
 
   function overlayColorStops(phase, alphaScale = 1) {
     const c1 = 0.5 + 0.5 * Math.sin(phase);
-    const c2 = 0.5 + 0.5 * Math.sin(phase + 2.1);
-    const c3 = 0.5 + 0.5 * Math.sin(phase + 4.2);
+    const c2 = 0.5 + 0.5 * Math.sin(phase + 1.85);
+    const c3 = 0.5 + 0.5 * Math.sin(phase + 3.85);
 
-    const whiteAlpha = (0.12 + c1 * 0.18) * alphaScale;
-    const blueAlpha = (0.1 + c2 * 0.17) * alphaScale;
-    const mintAlpha = (0.07 + c3 * 0.14) * alphaScale;
+    const whiteAlpha = (0.2 + c1 * 0.22) * alphaScale;
+    const blueAlpha = (0.11 + c2 * 0.17) * alphaScale;
+    const mintAlpha = (0.07 + c3 * 0.13) * alphaScale;
 
     return [
-      `rgba(${Math.round(236 + c1 * 18)}, ${Math.round(244 + c1 * 10)}, ${Math.round(252 + c1 * 4)}, ${whiteAlpha.toFixed(3)})`,
-      `rgba(${Math.round(165 + c2 * 35)}, ${Math.round(218 + c2 * 20)}, ${Math.round(248 + c2 * 7)}, ${blueAlpha.toFixed(3)})`,
-      `rgba(${Math.round(172 + c3 * 18)}, ${Math.round(228 + c3 * 16)}, ${Math.round(214 + c3 * 14)}, ${mintAlpha.toFixed(3)})`,
+      `rgba(${Math.round(244 + c1 * 8)}, ${Math.round(249 + c1 * 6)}, ${Math.round(255 - c2 * 2)}, ${whiteAlpha.toFixed(3)})`,
+      `rgba(${Math.round(202 + c2 * 24)}, ${Math.round(232 + c2 * 16)}, ${Math.round(255 - c3 * 4)}, ${blueAlpha.toFixed(3)})`,
+      `rgba(${Math.round(200 + c3 * 18)}, ${Math.round(241 + c3 * 10)}, ${Math.round(228 + c3 * 10)}, ${mintAlpha.toFixed(3)})`,
     ];
   }
 
   function drawOverlayVeils() {
     const { width, height } = state;
-    const overlayX = state.currentX * 0.34;
-    const overlayY = state.currentY * 0.26;
-    const phase = state.time * 0.5;
+    const overlayX = state.currentX * 0.44;
+    const overlayY = state.currentY * 0.34;
+    const phase = state.time * 0.82;
 
     ctx.save();
     ctx.globalCompositeOperation = "screen";
@@ -490,8 +532,8 @@
       ctx.closePath();
       ctx.fill();
 
-      ctx.strokeStyle = `rgba(248, 252, 255, ${(0.14 - i * 0.012).toFixed(3)})`;
-      ctx.lineWidth = Math.max(1.4, width * 0.0021);
+      ctx.strokeStyle = `rgba(246, 252, 255, ${(0.075 - i * 0.006).toFixed(3)})`;
+      ctx.lineWidth = Math.max(1, width * 0.0015);
       ctx.beginPath();
       ctx.moveTo(px - ribbonWidth * 0.06, -height * 0.08);
       ctx.bezierCurveTo(
@@ -513,8 +555,8 @@
       const stops = overlayColorStops(phase + i * 0.43, 1.0);
       const radial = ctx.createRadialGradient(rx, ry, 0, rx, ry, r);
       radial.addColorStop(0, stops[0]);
-      radial.addColorStop(0.36, stops[1]);
-      radial.addColorStop(0.72, stops[2]);
+      radial.addColorStop(0.28, stops[1]);
+      radial.addColorStop(0.62, stops[2]);
       radial.addColorStop(1, "rgba(255,255,255,0)");
       ctx.fillStyle = radial;
       ctx.fillRect(rx - r, ry - r, r * 2, r * 2);
@@ -525,8 +567,8 @@
 
   function drawT() {
     const { width, height } = state;
-    const overlayX = state.currentX * 0.38;
-    const overlayY = state.currentY * 0.3;
+    const overlayX = state.currentX * 0.48;
+    const overlayY = state.currentY * 0.38;
     const x = width * 0.58 + overlayX + Math.sin(state.time * 0.52) * 20;
     const y = height * 0.5 + overlayY + Math.cos(state.time * 0.46) * 24;
 
@@ -536,7 +578,7 @@
       -0.14 + state.currentX * 0.0008 + Math.sin(state.time * 0.22) * 0.05,
     );
     ctx.globalCompositeOperation = "screen";
-    ctx.font = `600 ${Math.round(Math.max(28, width * 0.066))}px "SFMono-Regular", Consolas, Menlo, Monaco, monospace`;
+    ctx.font = `500 ${Math.round(Math.max(28, width * 0.067))}px "Bahnschrift SemiCondensed", "Avenir Next Condensed", "Arial Narrow", "Segoe UI", sans-serif`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
 
@@ -547,8 +589,8 @@
     tg.addColorStop(1, stops[2]);
 
     ctx.fillStyle = tg;
-    ctx.shadowColor = "rgba(235, 248, 255, 0.22)";
-    ctx.shadowBlur = 20;
+    ctx.shadowColor = "rgba(240, 250, 255, 0.2)";
+    ctx.shadowBlur = 18;
     ctx.fillText("t", 0, 0);
     ctx.shadowBlur = 0;
     ctx.lineWidth = Math.max(1, width * 0.0011);
@@ -563,13 +605,13 @@
     ctx.globalCompositeOperation = "screen";
 
     const topBand = ctx.createLinearGradient(0, 0, 0, height * 0.24);
-    topBand.addColorStop(0, "rgba(218, 236, 244, 0.06)");
+    topBand.addColorStop(0, "rgba(234, 244, 250, 0.08)");
     topBand.addColorStop(1, "rgba(218, 236, 244, 0)");
     ctx.fillStyle = topBand;
     ctx.fillRect(0, 0, width, height * 0.24);
 
     const leftBand = ctx.createLinearGradient(0, 0, width * 0.22, 0);
-    leftBand.addColorStop(0, "rgba(142, 210, 229, 0.05)");
+    leftBand.addColorStop(0, "rgba(196, 234, 246, 0.07)");
     leftBand.addColorStop(1, "rgba(142, 210, 229, 0)");
     ctx.fillStyle = leftBand;
     ctx.fillRect(0, 0, width * 0.22, height);

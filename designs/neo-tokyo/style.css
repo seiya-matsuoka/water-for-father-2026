@@ -21,10 +21,15 @@ body {
   background:
     radial-gradient(
       circle at 50% 24%,
-      rgba(176, 228, 236, 0.12),
+      rgba(226, 241, 248, 0.16),
       transparent 30%
     ),
-    linear-gradient(180deg, #04101a 0%, #0a1621 42%, #07111b 100%);
+    radial-gradient(
+      circle at 50% 32%,
+      rgba(182, 235, 238, 0.08),
+      transparent 34%
+    ),
+    linear-gradient(180deg, #05121b 0%, #0b1721 42%, #07111b 100%);
   font-family:
     Inter,
     system-ui,
@@ -42,15 +47,20 @@ body {
   background:
     radial-gradient(
       circle at 52% 38%,
-      rgba(138, 211, 235, 0.1),
+      rgba(204, 236, 245, 0.12),
       transparent 28%
     ),
     radial-gradient(
-      circle at 50% 76%,
-      rgba(255, 196, 101, 0.06),
+      circle at 64% 24%,
+      rgba(168, 234, 224, 0.07),
       transparent 24%
     ),
-    linear-gradient(180deg, rgba(5, 14, 23, 0.98), rgba(7, 16, 26, 1));
+    radial-gradient(
+      circle at 50% 76%,
+      rgba(255, 204, 118, 0.07),
+      transparent 24%
+    ),
+    linear-gradient(180deg, rgba(7, 16, 24, 0.98), rgba(8, 18, 28, 1));
 }
 
 #neo-canvas,
@@ -97,27 +107,32 @@ body {
   background:
     radial-gradient(
       circle at 28% 30%,
-      rgba(245, 251, 255, 0.18),
+      rgba(250, 252, 255, 0.24),
       transparent 17%
     ),
     radial-gradient(
       circle at 66% 32%,
-      rgba(173, 239, 244, 0.18),
+      rgba(222, 243, 255, 0.22),
       transparent 18%
     ),
     radial-gradient(
       circle at 54% 58%,
-      rgba(192, 240, 227, 0.12),
+      rgba(212, 247, 235, 0.14),
       transparent 22%
     ),
     radial-gradient(
       circle at 42% 76%,
-      rgba(220, 232, 240, 0.12),
+      rgba(235, 242, 248, 0.16),
       transparent 20%
+    ),
+    radial-gradient(
+      circle at 72% 64%,
+      rgba(209, 245, 229, 0.1),
+      transparent 18%
     );
   mix-blend-mode: screen;
-  filter: blur(34px);
-  opacity: 0.92;
+  filter: blur(36px);
+  opacity: 0.97;
 }
 
 .neo-grain {
@@ -137,5 +152,5 @@ body {
       transparent 8px
     );
   mix-blend-mode: soft-light;
-  opacity: 0.1;
+  opacity: 0.085;
 }
