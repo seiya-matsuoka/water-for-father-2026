@@ -1,6 +1,6 @@
 :root {
   color-scheme: dark;
-  --scene-bg: #03050a;
+  --scene-bg: #02050a;
 }
 
 * {
@@ -32,21 +32,26 @@ body {
   overflow: hidden;
   background:
     radial-gradient(
-      circle at 18% 16%,
-      rgba(92, 144, 255, 0.12),
-      transparent 24%
+      circle at 14% 14%,
+      rgba(110, 170, 255, 0.16),
+      transparent 26%
     ),
     radial-gradient(
-      circle at 82% 84%,
-      rgba(110, 205, 255, 0.08),
-      transparent 24%
-    ),
-    radial-gradient(
-      circle at 70% 24%,
-      rgba(255, 213, 150, 0.05),
+      circle at 84% 22%,
+      rgba(255, 216, 140, 0.07),
       transparent 18%
     ),
-    linear-gradient(180deg, #02040a 0%, #050916 38%, #03050c 100%);
+    radial-gradient(
+      circle at 76% 82%,
+      rgba(160, 189, 255, 0.11),
+      transparent 24%
+    ),
+    radial-gradient(
+      circle at 26% 78%,
+      rgba(121, 121, 210, 0.08),
+      transparent 20%
+    ),
+    linear-gradient(180deg, #01040a 0%, #08131f 34%, #0b1929 58%, #02060d 100%);
 }
 
 #metallic-canvas {
@@ -63,17 +68,13 @@ body {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(
-      circle at 50% 50%,
-      transparent 52%,
-      rgba(0, 0, 0, 0.24) 92%
-    ),
+    radial-gradient(circle at 50% 50%, transparent 48%, rgba(0, 0, 0, 0.3) 94%),
     linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.02),
-      transparent 18%,
+      rgba(255, 255, 255, 0.03),
+      transparent 16%,
       transparent 82%,
-      rgba(0, 0, 0, 0.18)
+      rgba(0, 0, 0, 0.2)
     );
   mix-blend-mode: multiply;
 }
@@ -81,11 +82,11 @@ body {
 .grain-layer {
   position: absolute;
   inset: 0;
-  opacity: 0.055;
+  opacity: 0.05;
   background-image: radial-gradient(
     circle at 1px 1px,
-    rgba(255, 255, 255, 0.82) 0.55px,
-    transparent 0.72px
+    rgba(255, 255, 255, 0.88) 0.56px,
+    transparent 0.74px
   );
   background-size: 4px 4px;
   mix-blend-mode: soft-light;
