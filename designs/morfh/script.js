@@ -30,6 +30,7 @@
     tAnchor: null,
     overlayPatches: [],
     ripples: [],
+    autoRippleTime: 0,
   };
 
   const palette = {
@@ -317,30 +318,30 @@
 
   function buildOverlayPatches() {
     state.overlayPatches = [];
-    const count = 12;
+    const count = 14;
     for (let i = 0; i < count; i += 1) {
       state.overlayPatches.push({
         x: rand(0.05, 0.95),
         y: rand(0.04, 0.96),
-        w: rand(0.22, 0.52),
-        h: rand(0.18, 0.44),
-        alpha: rand(0.045, 0.11),
+        w: rand(0.24, 0.56),
+        h: rand(0.2, 0.46),
+        alpha: rand(0.055, 0.13),
         angle: rand(-Math.PI * 0.75, Math.PI * 0.75),
         seed: rand(0, Math.PI * 2),
-        spread: rand(0.7, 1.25),
+        spread: rand(0.8, 1.35),
         c0: choose([
-          "rgba(216,244,255,0.22)",
-          "rgba(202,236,255,0.20)",
-          "rgba(190,230,255,0.18)",
-          "rgba(182,224,251,0.17)",
-          "rgba(198,233,255,0.21)",
+          "rgba(220,246,255,0.24)",
+          "rgba(208,241,255,0.22)",
+          "rgba(198,235,255,0.20)",
+          "rgba(188,229,252,0.19)",
+          "rgba(214,242,255,0.23)",
         ]),
         c1: choose([
-          "rgba(152,214,255,0.14)",
-          "rgba(136,205,248,0.12)",
-          "rgba(170,222,255,0.11)",
-          "rgba(205,237,255,0.08)",
-          "rgba(172,220,255,0.10)",
+          "rgba(156,218,255,0.18)",
+          "rgba(138,208,248,0.15)",
+          "rgba(170,224,255,0.14)",
+          "rgba(205,237,255,0.11)",
+          "rgba(176,223,255,0.13)",
         ]),
       });
     }
@@ -590,6 +591,7 @@
     buildTiles();
     buildOverlayPatches();
     state.ripples = [];
+    state.autoRippleTime = performance.now() + rand(250, 900);
     paintBase();
     paintGrain();
   }
@@ -599,57 +601,69 @@
       x,
       y,
       r: 10,
-      alpha: clamp(0.06 + strength * 0.045, 0.06, 0.16),
-      thickness: clamp(20 + strength * 16, 18, 36),
-      stretchX: 1 + strength * 0.25,
-      stretchY: 1 - strength * 0.1,
-      vx: rand(-0.05, 0.05),
-      vy: rand(-0.03, 0.03),
+      alpha: clamp(0.1 + strength * 0.08, 0.1, 0.3),
+      thickness: clamp(28 + strength * 22, 24, 58),
+      stretchX: 1 + strength * 0.32,
+      stretchY: 1 - strength * 0.12,
+      vx: rand(-0.12, 0.12),
+      vy: rand(-0.1, 0.1),
     });
-    if (state.ripples.length > 14) state.ripples.shift();
+    if (state.ripples.length > 22) state.ripples.shift();
   }
 
   function updateRipples() {
     for (let i = state.ripples.length - 1; i >= 0; i -= 1) {
       const ripple = state.ripples[i];
-      ripple.r += 2.6;
-      ripple.alpha *= 0.972;
+      ripple.r += 3.6;
+      ripple.alpha *= 0.976;
       ripple.x += ripple.vx;
       ripple.y += ripple.vy;
-      ripple.stretchX += 0.002;
-      ripple.stretchY += 0.001;
-      if (ripple.alpha < 0.008 || ripple.r > Math.max(width, height) * 0.42) {
+      ripple.stretchX += 0.0032;
+      ripple.stretchY += 0.0016;
+      if (ripple.alpha < 0.01 || ripple.r > Math.max(width, height) * 0.55) {
         state.ripples.splice(i, 1);
       }
     }
   }
 
+  function maybeAddAutoRipple(time) {
+    if (pointer.active) return;
+    if (time < state.autoRippleTime) return;
+    addRipple(
+      rand(width * 0.18, width * 0.82),
+      rand(height * 0.16, height * 0.84),
+      rand(0.28, 0.52),
+    );
+    state.autoRippleTime = time + rand(700, 1500);
+  }
+
   function updateMotion(time) {
-    motion.vx += (motion.targetX - motion.x) * 0.042;
-    motion.vy += (motion.targetY - motion.y) * 0.042;
-    motion.vx *= 0.84;
-    motion.vy *= 0.84;
+    motion.vx += (motion.targetX - motion.x) * 0.035;
+    motion.vy += (motion.targetY - motion.y) * 0.035;
+    motion.vx *= 0.82;
+    motion.vy *= 0.82;
     motion.x += motion.vx;
     motion.y += motion.vy;
 
     if (!pointer.active) {
-      motion.targetX = Math.sin(time * 0.00018) * 5.1;
-      motion.targetY = Math.cos(time * 0.00015) * 4.2;
+      motion.targetX = Math.sin(time * 0.00032) * 12.5;
+      motion.targetY = Math.cos(time * 0.00027) * 10.5;
     }
 
     overlayMotion.targetX =
-      motion.targetX * 2.7 + Math.sin(time * 0.0009) * 5.5;
+      motion.targetX * 4.2 + Math.sin(time * 0.00125) * 10.0;
     overlayMotion.targetY =
-      motion.targetY * 2.3 + Math.cos(time * 0.00076) * 4.2;
-    overlayMotion.vx += (overlayMotion.targetX - overlayMotion.x) * 0.055;
-    overlayMotion.vy += (overlayMotion.targetY - overlayMotion.y) * 0.055;
+      motion.targetY * 3.9 + Math.cos(time * 0.00105) * 8.2;
+    overlayMotion.vx += (overlayMotion.targetX - overlayMotion.x) * 0.082;
+    overlayMotion.vy += (overlayMotion.targetY - overlayMotion.y) * 0.082;
     overlayMotion.vx *= 0.9;
     overlayMotion.vy *= 0.9;
     overlayMotion.x += overlayMotion.vx;
     overlayMotion.y += overlayMotion.vy;
     overlayMotion.flow +=
-      0.01 + Math.abs(overlayMotion.vx + overlayMotion.vy) * 0.0007;
+      0.013 + Math.abs(overlayMotion.vx + overlayMotion.vy) * 0.0028;
 
+    maybeAddAutoRipple(time);
     updateRipples();
   }
 
@@ -660,34 +674,35 @@
     state.ripples.forEach((ripple, index) => {
       ctx.save();
       ctx.translate(
-        ripple.x + overlayMotion.x * 0.18,
-        ripple.y + overlayMotion.y * 0.16,
+        ripple.x + overlayMotion.x * 0.24,
+        ripple.y + overlayMotion.y * 0.2,
       );
       ctx.scale(ripple.stretchX, ripple.stretchY);
-      const phase = time * 0.001 + index * 0.45;
+      const phase = time * 0.0014 + index * 0.55;
       const grad = ctx.createRadialGradient(
         0,
         0,
-        ripple.r * 0.22,
+        ripple.r * 0.2,
         0,
         0,
         ripple.r + ripple.thickness,
       );
       grad.addColorStop(0, "rgba(255,255,255,0)");
-      grad.addColorStop(0.36, `rgba(236,248,255,${ripple.alpha * 0.35})`);
-      grad.addColorStop(0.58, `rgba(186,227,255,${ripple.alpha * 0.54})`);
-      grad.addColorStop(0.74, `rgba(224,245,255,${ripple.alpha * 0.28})`);
+      grad.addColorStop(0.28, `rgba(240,250,255,${ripple.alpha * 0.36})`);
+      grad.addColorStop(0.52, `rgba(186,227,255,${ripple.alpha * 0.82})`);
+      grad.addColorStop(0.68, `rgba(162,218,255,${ripple.alpha * 0.54})`);
+      grad.addColorStop(0.84, `rgba(232,248,255,${ripple.alpha * 0.26})`);
       grad.addColorStop(1, "rgba(255,255,255,0)");
       ctx.fillStyle = grad;
       ctx.beginPath();
       ctx.arc(0, 0, ripple.r + ripple.thickness, 0, Math.PI * 2);
       ctx.fill();
 
-      ctx.rotate(Math.sin(phase) * 0.12);
-      ctx.strokeStyle = `rgba(210,239,255,${ripple.alpha * 0.16})`;
-      ctx.lineWidth = 1.2;
+      ctx.rotate(Math.sin(phase) * 0.16);
+      ctx.strokeStyle = `rgba(214,241,255,${ripple.alpha * 0.22})`;
+      ctx.lineWidth = 1.6;
       ctx.beginPath();
-      ctx.ellipse(0, 0, ripple.r * 0.94, ripple.r * 0.62, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, 0, ripple.r * 1.02, ripple.r * 0.66, 0, 0, Math.PI * 2);
       ctx.stroke();
       ctx.restore();
     });
@@ -701,103 +716,104 @@
 
     state.overlayPatches.forEach((patch, index) => {
       const sway = Math.sin(
-        time * 0.00034 + patch.seed + index * 0.31 + overlayMotion.flow * 0.4,
+        time * 0.00055 + patch.seed + index * 0.31 + overlayMotion.flow * 0.62,
       );
       const sway2 = Math.cos(
-        time * 0.00028 +
+        time * 0.00042 +
           patch.seed * 1.7 +
           index * 0.23 -
-          overlayMotion.flow * 0.3,
+          overlayMotion.flow * 0.42,
       );
-      const drift = Math.sin(time * 0.0007 + patch.seed) * 0.4;
-      const dx = sway * width * 0.03 + overlayMotion.x * 0.92;
-      const dy = sway2 * height * 0.028 + overlayMotion.y * 0.86;
+      const drift = Math.sin(time * 0.0011 + patch.seed) * 0.55;
+      const dx = sway * width * 0.045 + overlayMotion.x * 1.28;
+      const dy = sway2 * height * 0.04 + overlayMotion.y * 1.18;
       const px = patch.x * width + dx;
       const py = patch.y * height + dy;
       const pw = patch.w * width * patch.spread;
       const ph = patch.h * height * patch.spread;
 
       const membrane = ctx.createRadialGradient(
-        px - pw * 0.14,
-        py - ph * 0.1,
+        px - pw * 0.16,
+        py - ph * 0.12,
         0,
         px,
         py,
-        Math.max(pw, ph) * 1.2,
+        Math.max(pw, ph) * 1.22,
       );
       membrane.addColorStop(0, patch.c0);
-      membrane.addColorStop(0.22, `rgba(234,248,255,${patch.alpha * 0.74})`);
-      membrane.addColorStop(0.48, patch.c1);
-      membrane.addColorStop(0.78, "rgba(178,226,255,0.028)");
+      membrane.addColorStop(0.18, `rgba(238,250,255,${patch.alpha * 0.88})`);
+      membrane.addColorStop(0.4, `rgba(202,236,255,${patch.alpha * 0.74})`);
+      membrane.addColorStop(0.66, patch.c1);
+      membrane.addColorStop(0.84, "rgba(176,223,255,0.040)");
       membrane.addColorStop(1, "rgba(255,255,255,0)");
       ctx.fillStyle = membrane;
       ctx.fillRect(px - pw, py - ph, pw * 2, ph * 2);
 
       ctx.save();
       ctx.translate(px, py);
-      ctx.rotate(patch.angle + sway * 0.22 + drift * 0.09);
+      ctx.rotate(patch.angle + sway * 0.3 + drift * 0.14);
 
       const ribbon = ctx.createLinearGradient(-pw * 0.75, 0, pw * 0.75, 0);
       ribbon.addColorStop(0, "rgba(255,255,255,0)");
-      ribbon.addColorStop(0.18, "rgba(206,239,255,0.018)");
-      ribbon.addColorStop(0.38, "rgba(222,246,255,0.062)");
-      ribbon.addColorStop(0.5, "rgba(240,251,255,0.092)");
-      ribbon.addColorStop(0.62, "rgba(186,229,255,0.048)");
-      ribbon.addColorStop(0.82, "rgba(214,241,255,0.018)");
+      ribbon.addColorStop(0.12, "rgba(208,239,255,0.028)");
+      ribbon.addColorStop(0.32, "rgba(222,246,255,0.090)");
+      ribbon.addColorStop(0.5, "rgba(248,253,255,0.132)");
+      ribbon.addColorStop(0.68, "rgba(184,230,255,0.082)");
+      ribbon.addColorStop(0.86, "rgba(214,241,255,0.026)");
       ribbon.addColorStop(1, "rgba(255,255,255,0)");
       ctx.fillStyle = ribbon;
       ctx.beginPath();
-      ctx.moveTo(-pw * 0.82, -ph * 0.18);
+      ctx.moveTo(-pw * 0.88, -ph * 0.22);
       ctx.bezierCurveTo(
-        -pw * 0.36,
-        -ph * (0.24 + sway * 0.14),
+        -pw * 0.42,
+        -ph * (0.32 + sway * 0.16),
         -pw * 0.1,
-        ph * (0.22 + sway2 * 0.1),
-        pw * 0.22,
-        -ph * (0.1 + drift * 0.12),
+        ph * (0.32 + sway2 * 0.12),
+        pw * 0.24,
+        -ph * (0.16 + drift * 0.14),
       );
       ctx.bezierCurveTo(
-        pw * 0.48,
-        -ph * (0.28 + sway * 0.1),
-        pw * 0.56,
-        ph * (0.22 + sway2 * 0.08),
-        pw * 0.84,
-        ph * 0.04,
+        pw * 0.5,
+        -ph * (0.36 + sway * 0.12),
+        pw * 0.62,
+        ph * (0.3 + sway2 * 0.1),
+        pw * 0.9,
+        ph * 0.08,
       );
-      ctx.lineTo(pw * 0.84, ph * 0.22);
+      ctx.lineTo(pw * 0.9, ph * 0.28);
       ctx.bezierCurveTo(
-        pw * 0.36,
-        ph * (0.34 + sway * 0.08),
+        pw * 0.4,
+        ph * (0.42 + sway * 0.1),
         0,
-        ph * (0.1 + sway2 * 0.1),
-        -pw * 0.82,
-        ph * 0.24,
+        ph * (0.14 + sway2 * 0.12),
+        -pw * 0.88,
+        ph * 0.3,
       );
       ctx.closePath();
       ctx.fill();
 
       const caustic = ctx.createLinearGradient(
-        -pw * 0.6,
-        -ph * 0.2,
-        pw * 0.6,
-        ph * 0.2,
+        -pw * 0.64,
+        -ph * 0.22,
+        pw * 0.64,
+        ph * 0.22,
       );
       caustic.addColorStop(0, "rgba(255,255,255,0)");
-      caustic.addColorStop(0.44, "rgba(242,252,255,0.05)");
-      caustic.addColorStop(0.5, "rgba(255,255,255,0.09)");
-      caustic.addColorStop(0.56, "rgba(191,233,255,0.05)");
+      caustic.addColorStop(0.38, "rgba(242,252,255,0.08)");
+      caustic.addColorStop(0.5, "rgba(255,255,255,0.14)");
+      caustic.addColorStop(0.62, "rgba(191,233,255,0.07)");
       caustic.addColorStop(1, "rgba(255,255,255,0)");
       ctx.strokeStyle = caustic;
-      ctx.lineWidth = Math.max(10, pw * 0.05);
+      ctx.lineWidth = Math.max(12, pw * 0.055);
       ctx.beginPath();
-      ctx.moveTo(-pw * 0.74, ph * (-0.05 + sway * 0.08));
+      ctx.moveTo(-pw * 0.78, ph * (-0.06 + sway * 0.1));
       ctx.bezierCurveTo(
-        -pw * 0.34,
-        ph * (0.3 + sway2 * 0.1),
+        -pw * 0.38,
+        ph * (0.38 + sway2 * 0.12),
         pw * 0.08,
-        ph * (-0.26 + sway * 0.08),
-        pw * 0.72,
-        ph * (0.12 + sway2 * 0.08),
+        ph * (-0.32 + sway * 0.1),
+        pw * 0.78,
+        ph * (0.14 + sway2 * 0.1),
       );
       ctx.stroke();
       ctx.restore();
@@ -840,15 +856,14 @@
     updateMotion(time);
     ctx.clearRect(0, 0, width, height);
 
-    const baseOffsetX = motion.x * 0.12;
-    const baseOffsetY = motion.y * 0.1;
-    ctx.drawImage(baseCanvas, baseOffsetX, baseOffsetY, width, height);
+    // ベースのグリッド自体は固定し、ドラッグ・スワイプでは動かさない
+    ctx.drawImage(baseCanvas, 0, 0, width, height);
 
     drawOverlay(time);
 
     ctx.save();
     ctx.globalAlpha = 0.95;
-    ctx.drawImage(grainCanvas, motion.x * 0.08, motion.y * 0.08, width, height);
+    ctx.drawImage(grainCanvas, 0, 0, width, height);
     ctx.restore();
 
     drawT(time);
@@ -859,10 +874,10 @@
     pointer.active = active;
     const nx = (x / width - 0.5) * 2;
     const ny = (y / height - 0.5) * 2;
-    motion.targetX = clamp(nx * 11, -11, 11);
-    motion.targetY = clamp(ny * 9, -9, 9);
-    overlayMotion.targetX = clamp(nx * 26, -26, 26);
-    overlayMotion.targetY = clamp(ny * 22, -22, 22);
+    motion.targetX = clamp(nx * 18, -18, 18);
+    motion.targetY = clamp(ny * 15, -15, 15);
+    overlayMotion.targetX = clamp(nx * 52, -52, 52);
+    overlayMotion.targetY = clamp(ny * 44, -44, 44);
   }
 
   function preventTouchDefault(event) {
@@ -880,7 +895,7 @@
     pointer.lastY = event.clientY;
     pointer.lastTime = performance.now();
     handlePointer(event.clientX, event.clientY, true);
-    addRipple(event.clientX, event.clientY, 0.8);
+    addRipple(event.clientX, event.clientY, 1.15);
   });
 
   canvas.addEventListener("pointermove", (event) => {
@@ -891,8 +906,8 @@
     const dy = event.clientY - pointer.lastY;
     const speed = Math.sqrt(dx * dx + dy * dy) / dt;
     handlePointer(event.clientX, event.clientY, true);
-    if (Math.abs(dx) + Math.abs(dy) > 6) {
-      addRipple(event.clientX, event.clientY, clamp(speed * 2.6, 0.4, 1.5));
+    if (Math.abs(dx) + Math.abs(dy) > 3) {
+      addRipple(event.clientX, event.clientY, clamp(speed * 4.4, 0.8, 2.4));
     }
     pointer.lastX = event.clientX;
     pointer.lastY = event.clientY;
