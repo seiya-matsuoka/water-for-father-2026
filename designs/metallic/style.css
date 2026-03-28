@@ -1,6 +1,6 @@
 :root {
   color-scheme: dark;
-  --scene-bg: #05060b;
+  --scene-bg: #03050a;
 }
 
 * {
@@ -32,21 +32,21 @@ body {
   overflow: hidden;
   background:
     radial-gradient(
-      circle at 50% 50%,
-      rgba(255, 255, 255, 0.02),
-      transparent 40%
+      circle at 18% 16%,
+      rgba(92, 144, 255, 0.12),
+      transparent 24%
     ),
     radial-gradient(
-      circle at top left,
-      rgba(102, 124, 255, 0.12),
-      transparent 22%
+      circle at 82% 84%,
+      rgba(110, 205, 255, 0.08),
+      transparent 24%
     ),
     radial-gradient(
-      circle at bottom right,
-      rgba(255, 72, 183, 0.1),
-      transparent 22%
+      circle at 70% 24%,
+      rgba(255, 213, 150, 0.05),
+      transparent 18%
     ),
-    var(--scene-bg);
+    linear-gradient(180deg, #02040a 0%, #050916 38%, #03050c 100%);
 }
 
 #metallic-canvas {
@@ -65,15 +65,15 @@ body {
   background:
     radial-gradient(
       circle at 50% 50%,
-      transparent 56%,
-      rgba(0, 0, 0, 0.18) 88%
+      transparent 52%,
+      rgba(0, 0, 0, 0.24) 92%
     ),
     linear-gradient(
       180deg,
-      rgba(0, 0, 0, 0.08),
-      transparent 20%,
-      transparent 80%,
-      rgba(0, 0, 0, 0.12)
+      rgba(255, 255, 255, 0.02),
+      transparent 18%,
+      transparent 82%,
+      rgba(0, 0, 0, 0.18)
     );
   mix-blend-mode: multiply;
 }
@@ -81,11 +81,11 @@ body {
 .grain-layer {
   position: absolute;
   inset: 0;
-  opacity: 0.07;
+  opacity: 0.055;
   background-image: radial-gradient(
     circle at 1px 1px,
-    rgba(255, 255, 255, 0.75) 0.6px,
-    transparent 0.7px
+    rgba(255, 255, 255, 0.82) 0.55px,
+    transparent 0.72px
   );
   background-size: 4px 4px;
   mix-blend-mode: soft-light;
