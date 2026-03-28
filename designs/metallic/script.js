@@ -24,7 +24,7 @@
       slope: 0.74,
       alpha: 0.98,
       edgeAlpha: 0.66,
-      colors: ["#020713", "#f6fbff", "#c8d9ea", "#6d8eb6", "#10233f"],
+      colors: ["#01040d", "#ffffff", "#d8e6f5", "#6f91b8", "#061327"],
     },
     {
       yOffset: -0.18,
@@ -35,7 +35,7 @@
       slope: 0.9,
       alpha: 0.9,
       edgeAlpha: 0.5,
-      colors: ["#030915", "#eef5ff", "#9fb9d7", "#57739c", "#08182e"],
+      colors: ["#01050d", "#f6fbff", "#b7cae4", "#5c7ea8", "#051226"],
     },
     {
       yOffset: 0.06,
@@ -46,7 +46,7 @@
       slope: 0.62,
       alpha: 1,
       edgeAlpha: 0.7,
-      colors: ["#030712", "#ffffff", "#c8d5e3", "#82a5cd", "#11284c"],
+      colors: ["#01040b", "#ffffff", "#d7e0ea", "#89abd1", "#0b2141"],
     },
     {
       yOffset: 0.24,
@@ -57,7 +57,7 @@
       slope: 1.02,
       alpha: 0.9,
       edgeAlpha: 0.46,
-      colors: ["#030711", "#f2f8ff", "#b7d4fb", "#7c93d6", "#0d1932"],
+      colors: ["#01040a", "#fbfdff", "#c5daf7", "#7d92d1", "#071327"],
     },
     {
       yOffset: 0.42,
@@ -68,7 +68,7 @@
       slope: 0.78,
       alpha: 0.95,
       edgeAlpha: 0.62,
-      colors: ["#020812", "#eef7ff", "#cad4dc", "#9aa9c1", "#203658"],
+      colors: ["#01050c", "#f8fbff", "#d5dde6", "#98aac4", "#112744"],
     },
     {
       yOffset: 0.72,
@@ -79,7 +79,7 @@
       slope: 0.86,
       alpha: 0.88,
       edgeAlpha: 0.44,
-      colors: ["#030813", "#f5fbff", "#cfdcf0", "#87a2c5", "#152846"],
+      colors: ["#01050c", "#ffffff", "#dbe6f4", "#8ea8ca", "#0b203c"],
     },
   ];
 
@@ -373,17 +373,17 @@
   }
 
   function drawBand(spec, index, width, height, time) {
-    const topY = -height * 0.34;
-    const bottomY = height * 1.34;
-    const steps = Math.max(34, Math.floor(height / 26));
+    const topY = -height * 0.62;
+    const bottomY = height * 1.62;
+    const steps = Math.max(46, Math.floor(height / 22));
     const stepSize = (bottomY - topY) / steps;
 
-    const baseCenterX = width * (-0.34 + spec.yOffset * 0.7);
+    const baseCenterX = width * (-0.38 + spec.yOffset * 0.72);
     const motionShift =
-      state.rotation.y * width * 0.5 +
-      Math.sin(time * (0.14 + index * 0.03)) * width * 0.045;
-    const verticalShift = state.rotation.x * height * 0.22;
-    const bandWidthBase = Math.max(width, height) * spec.thickness;
+      state.rotation.y * width * 0.54 +
+      Math.sin(time * (0.14 + index * 0.03)) * width * 0.052;
+    const verticalShift = state.rotation.x * height * 0.26;
+    const bandWidthBase = Math.max(width, height) * spec.thickness * 1.08;
 
     const leftPoints = [];
     const rightPoints = [];
@@ -413,7 +413,7 @@
         wobble +
         sphereCurve * width * state.rotation.y * 0.23;
       const widthPulse = 1 + Math.sin(time * 0.5 + normY * 10 + index) * 0.11;
-      const sphereCompression = 1 - Math.abs(normY - 0.5) * 0.16;
+      const sphereCompression = 1 - Math.abs(normY - 0.5) * 0.08;
       const half = bandWidthBase * widthPulse * sphereCompression * 0.5;
       const edgeWave =
         Math.sin(time * 0.82 + normY * 13 + index * 2.2) * width * 0.012;
@@ -463,13 +463,47 @@
 
     ctx.globalCompositeOperation = "overlay";
     const tint = ctx.createLinearGradient(0, 0, width, height);
-    tint.addColorStop(0, "rgba(125, 176, 255, 0.2)");
-    tint.addColorStop(0.34, "rgba(214, 227, 255, 0.12)");
-    tint.addColorStop(0.58, "rgba(255, 221, 171, 0.08)");
-    tint.addColorStop(0.74, "rgba(144, 150, 255, 0.07)");
+    tint.addColorStop(0, "rgba(125, 176, 255, 0.22)");
+    tint.addColorStop(0.28, "rgba(232, 239, 248, 0.16)");
+    tint.addColorStop(0.56, "rgba(255, 226, 182, 0.1)");
+    tint.addColorStop(0.74, "rgba(132, 144, 255, 0.11)");
     tint.addColorStop(1, "rgba(255,255,255,0)");
     ctx.fillStyle = tint;
     ctx.fillRect(-width * 0.15, 0, width * 1.3, height);
+
+    ctx.globalCompositeOperation = "screen";
+    const specularCore = ctx.createLinearGradient(
+      width * (-0.04 + state.rotation.y * 0.025),
+      height * 0.04,
+      width * (1.02 + state.rotation.y * 0.03),
+      height * 0.96,
+    );
+    specularCore.addColorStop(0, "rgba(255,255,255,0)");
+    specularCore.addColorStop(0.22, "rgba(255,255,255,0.08)");
+    specularCore.addColorStop(0.42, "rgba(255,255,255,0.3)");
+    specularCore.addColorStop(0.5, "rgba(255,255,255,0.78)");
+    specularCore.addColorStop(0.56, "rgba(199,224,255,0.26)");
+    specularCore.addColorStop(0.66, "rgba(255,219,162,0.14)");
+    specularCore.addColorStop(0.78, "rgba(151,145,255,0.12)");
+    specularCore.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = specularCore;
+    ctx.fillRect(-width * 0.22, -height * 0.08, width * 1.52, height * 1.16);
+
+    ctx.globalCompositeOperation = "destination-in";
+    const endFade = ctx.createLinearGradient(
+      0,
+      topY + verticalShift,
+      0,
+      bottomY + verticalShift,
+    );
+    endFade.addColorStop(0, "rgba(255,255,255,0)");
+    endFade.addColorStop(0.08, "rgba(255,255,255,0.38)");
+    endFade.addColorStop(0.14, "rgba(255,255,255,0.95)");
+    endFade.addColorStop(0.86, "rgba(255,255,255,0.95)");
+    endFade.addColorStop(0.92, "rgba(255,255,255,0.38)");
+    endFade.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = endFade;
+    ctx.fillRect(-width * 0.5, topY + verticalShift, width * 2, bottomY - topY);
 
     ctx.restore();
 
@@ -549,11 +583,11 @@
     ctx.lineCap = "round";
 
     const arcs = [
-      { y: 0.12, alpha: 0.16, width: 2.1, drift: 0.18 },
-      { y: 0.32, alpha: 0.12, width: 1.4, drift: 0.14 },
-      { y: 0.52, alpha: 0.24, width: 3.3, drift: 0.22 },
-      { y: 0.72, alpha: 0.15, width: 1.8, drift: 0.18 },
-      { y: 0.88, alpha: 0.12, width: 1.3, drift: 0.13 },
+      { y: 0.12, alpha: 0.18, width: 2.4, drift: 0.18 },
+      { y: 0.32, alpha: 0.14, width: 1.8, drift: 0.14 },
+      { y: 0.52, alpha: 0.28, width: 3.8, drift: 0.22 },
+      { y: 0.72, alpha: 0.18, width: 2.1, drift: 0.18 },
+      { y: 0.88, alpha: 0.14, width: 1.6, drift: 0.13 },
     ];
 
     arcs.forEach((arc, index) => {
@@ -653,11 +687,11 @@
     ctx.globalCompositeOperation = "screen";
 
     const glow = ctx.createRadialGradient(x, y, radius * 0.025, x, y, radius);
-    glow.addColorStop(0, "rgba(255,255,255,0.5)");
-    glow.addColorStop(0.06, "rgba(255,255,255,0.24)");
-    glow.addColorStop(0.24, "rgba(210,231,255,0.18)");
-    glow.addColorStop(0.48, "rgba(255,222,163,0.08)");
-    glow.addColorStop(0.62, "rgba(150,149,255,0.05)");
+    glow.addColorStop(0, "rgba(255,255,255,0.64)");
+    glow.addColorStop(0.05, "rgba(255,255,255,0.34)");
+    glow.addColorStop(0.22, "rgba(214,233,255,0.24)");
+    glow.addColorStop(0.46, "rgba(255,222,163,0.11)");
+    glow.addColorStop(0.62, "rgba(150,149,255,0.07)");
     glow.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = glow;
     ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
@@ -669,11 +703,11 @@
       height * 0.96,
     );
     rim.addColorStop(0, "rgba(255,255,255,0)");
-    rim.addColorStop(0.28, "rgba(255,255,255,0.12)");
-    rim.addColorStop(0.48, "rgba(255,255,255,0.24)");
-    rim.addColorStop(0.6, "rgba(198,225,255,0.1)");
-    rim.addColorStop(0.72, "rgba(255,223,174,0.08)");
-    rim.addColorStop(0.82, "rgba(145,149,255,0.06)");
+    rim.addColorStop(0.24, "rgba(255,255,255,0.14)");
+    rim.addColorStop(0.42, "rgba(255,255,255,0.3)");
+    rim.addColorStop(0.58, "rgba(198,225,255,0.13)");
+    rim.addColorStop(0.72, "rgba(255,223,174,0.1)");
+    rim.addColorStop(0.82, "rgba(145,149,255,0.08)");
     rim.addColorStop(1, "rgba(255,255,255,0)");
     ctx.fillStyle = rim;
     ctx.fillRect(0, 0, width, height);
@@ -737,39 +771,17 @@
       fontSize * 0.34,
       fontSize * 0.42,
     );
-    fill.addColorStop(0, `rgba(244, 248, 255, ${reveal * 0.16})`);
-    fill.addColorStop(0.4, `rgba(180, 214, 255, ${reveal * 0.13})`);
+    fill.addColorStop(0, `rgba(244, 248, 255, ${reveal * 0.15})`);
+    fill.addColorStop(0.34, `rgba(188, 218, 255, ${reveal * 0.14})`);
     fill.addColorStop(0.72, `rgba(255, 218, 166, ${reveal * 0.11})`);
-    fill.addColorStop(1, `rgba(164, 156, 255, ${reveal * 0.08})`);
+    fill.addColorStop(1, `rgba(164, 156, 255, ${reveal * 0.1})`);
     ctx.fillStyle = fill;
     ctx.fillText("t", 0, 0);
 
-    const streakWidth = fontSize * 0.18;
-    const streakX = -fontSize * 0.3 + sweep * fontSize * 0.62;
-    ctx.beginPath();
-    ctx.rect(
-      -fontSize * 0.46,
-      -fontSize * 0.52,
-      fontSize * 0.92,
-      fontSize * 1.04,
-    );
-    ctx.clip();
-    const streak = ctx.createLinearGradient(
-      streakX - streakWidth,
-      -fontSize * 0.5,
-      streakX + streakWidth,
-      fontSize * 0.45,
-    );
-    streak.addColorStop(0, "rgba(255,255,255,0)");
-    streak.addColorStop(0.5, `rgba(255,255,255,${reveal * 0.46})`);
-    streak.addColorStop(1, "rgba(255,255,255,0)");
-    ctx.fillStyle = streak;
-    ctx.fillRect(
-      -fontSize * 0.6,
-      -fontSize * 0.6,
-      fontSize * 1.2,
-      fontSize * 1.2,
-    );
+    ctx.globalCompositeOperation = "screen";
+    ctx.lineWidth = fontSize * 0.014;
+    ctx.strokeStyle = `rgba(255,255,255,${reveal * (0.18 + sweep * 0.1)})`;
+    ctx.strokeText("t", -0.4, -0.6);
     ctx.restore();
   }
 

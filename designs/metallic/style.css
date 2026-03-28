@@ -33,25 +33,25 @@ body {
   background:
     radial-gradient(
       circle at 14% 14%,
-      rgba(110, 170, 255, 0.16),
-      transparent 26%
+      rgba(138, 185, 255, 0.18),
+      transparent 28%
     ),
     radial-gradient(
       circle at 84% 22%,
-      rgba(255, 216, 140, 0.07),
-      transparent 18%
+      rgba(255, 221, 157, 0.08),
+      transparent 20%
     ),
     radial-gradient(
       circle at 76% 82%,
-      rgba(160, 189, 255, 0.11),
-      transparent 24%
+      rgba(177, 199, 255, 0.13),
+      transparent 26%
     ),
     radial-gradient(
       circle at 26% 78%,
-      rgba(121, 121, 210, 0.08),
-      transparent 20%
+      rgba(121, 126, 232, 0.09),
+      transparent 22%
     ),
-    linear-gradient(180deg, #01040a 0%, #08131f 34%, #0b1929 58%, #02060d 100%);
+    linear-gradient(180deg, #01040a 0%, #091421 30%, #102133 56%, #02060d 100%);
 }
 
 #metallic-canvas {
@@ -68,13 +68,17 @@ body {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 50% 50%, transparent 48%, rgba(0, 0, 0, 0.3) 94%),
+    radial-gradient(
+      circle at 50% 50%,
+      transparent 48%,
+      rgba(0, 0, 0, 0.34) 94%
+    ),
     linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.03),
+      rgba(255, 255, 255, 0.04),
       transparent 16%,
       transparent 82%,
-      rgba(0, 0, 0, 0.2)
+      rgba(0, 0, 0, 0.24)
     );
   mix-blend-mode: multiply;
 }
