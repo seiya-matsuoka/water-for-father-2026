@@ -13,86 +13,64 @@
   let dpr = 1;
 
   const pointer = { active: false };
-  const motion = {
-    x: 0,
-    y: 0,
-    targetX: 0,
-    targetY: 0,
-    vx: 0,
-    vy: 0,
-  };
+  const motion = { x: 0, y: 0, targetX: 0, targetY: 0, vx: 0, vy: 0 };
 
   const state = {
     tiles: [],
+    refs: [],
     tAnchor: null,
     overlayPatches: [],
   };
 
   const palette = {
-    bg0: "#dff0f8",
-    bg1: "#edf7fb",
-    bg2: "#e6f3f5",
-    paperWhite: "#f8fcfd",
-    whiteTint: "rgba(251, 254, 255, 0.98)",
-    ice: "rgba(228, 245, 253, 0.98)",
-    sky: "rgba(190, 229, 249, 0.96)",
-    cyan: "rgba(153, 216, 247, 0.95)",
-    aqua: "rgba(125, 204, 244, 0.93)",
-    blueDeep: "rgba(98, 188, 239, 0.90)",
-    lavender: "rgba(209, 191, 247, 0.94)",
-    violet: "rgba(156, 133, 233, 0.90)",
-    mint: "rgba(206, 239, 226, 0.84)",
-    yellow: "rgba(245, 238, 176, 0.82)",
-    seam: "rgba(225, 235, 239, 0.82)",
-    seamShadow: "rgba(160, 172, 178, 0.13)",
-    grainDark: "rgba(109, 118, 126, 0.23)",
-    grainLight: "rgba(255,255,255,0.28)",
-    tBlue: "rgba(176, 227, 255, 0.68)",
-    tLavender: "rgba(198, 186, 244, 0.36)",
+    bg0: "#d8eef8",
+    bg1: "#eef8fb",
+    bg2: "#e0f3f8",
+    paperWhite: "rgba(252, 254, 255, 0.99)",
+    softWhite: "rgba(248, 252, 255, 0.94)",
+    iceWhite: "rgba(235, 247, 255, 0.96)",
+    blue0: "rgba(216, 242, 255, 0.94)",
+    blue1: "rgba(185, 228, 252, 0.95)",
+    blue2: "rgba(149, 214, 247, 0.94)",
+    blue3: "rgba(121, 198, 243, 0.92)",
+    lavender0: "rgba(227, 216, 252, 0.95)",
+    lavender1: "rgba(198, 176, 246, 0.94)",
+    violet1: "rgba(165, 140, 237, 0.92)",
+    mint0: "rgba(216, 244, 234, 0.93)",
+    mint1: "rgba(181, 234, 219, 0.91)",
+    yellow0: "rgba(246, 241, 191, 0.88)",
+    yellow1: "rgba(239, 229, 150, 0.86)",
+    seam: "rgba(226, 235, 238, 0.84)",
+    seamShadow: "rgba(165, 174, 182, 0.14)",
+    grainDark: "rgba(106, 115, 124, 0.24)",
+    grainLight: "rgba(255, 255, 255, 0.28)",
+    tBlue: "rgba(196, 235, 255, 0.7)",
+    tLavender: "rgba(195, 185, 241, 0.34)",
   };
 
-  const tileFamilies = [
-    {
-      weight: 5.6,
-      base: "rgba(231,246,252,0.98)",
-      ramp: [palette.whiteTint, palette.sky, palette.cyan],
-      accent: [palette.whiteTint, palette.lavender],
-    },
-    {
-      weight: 3.8,
-      base: "rgba(227,244,251,0.98)",
-      ramp: [palette.ice, palette.cyan, palette.aqua],
-      accent: [palette.whiteTint, palette.violet],
-    },
-    {
-      weight: 2.3,
-      base: "rgba(229,245,252,0.98)",
-      ramp: [palette.whiteTint, palette.sky, palette.lavender],
-      accent: [palette.whiteTint, palette.violet],
-    },
-    {
-      weight: 1.3,
-      base: "rgba(232,246,251,0.98)",
-      ramp: [palette.ice, palette.cyan, palette.sky],
-      accent: [palette.whiteTint, palette.mint],
-    },
-    {
-      weight: 0.9,
-      base: "rgba(234,247,250,0.98)",
-      ramp: [palette.whiteTint, palette.sky, palette.cyan],
-      accent: [palette.whiteTint, palette.yellow],
-    },
+  const cornerPool = [
+    { id: "b0", color: palette.blue0 },
+    { id: "b1", color: palette.blue1 },
+    { id: "b2", color: palette.blue2 },
+    { id: "b3", color: palette.blue3 },
+    { id: "l0", color: palette.lavender0 },
+    { id: "l1", color: palette.lavender1 },
+    { id: "v1", color: palette.violet1 },
+    { id: "m0", color: palette.mint0 },
+    { id: "m1", color: palette.mint1 },
+    { id: "y0", color: palette.yellow0 },
+    { id: "y1", color: palette.yellow1 },
+    { id: "w0", color: palette.paperWhite },
+    { id: "w1", color: palette.iceWhite },
   ];
 
-  const gradientModes = [
-    "h",
-    "v",
-    "diagA",
-    "diagB",
-    "corner",
-    "sweep",
-    "band",
-    "cross",
+  const centerPool = [
+    { id: "cw", color: palette.paperWhite },
+    { id: "ci", color: palette.iceWhite },
+    { id: "cb", color: palette.blue0 },
+    { id: "cl", color: palette.lavender0 },
+    { id: "cm", color: palette.mint0 },
+    { id: "cy", color: palette.yellow0 },
   ];
 
   function clamp(v, min, max) {
@@ -125,83 +103,171 @@
     targetCtx.scale(dpr, dpr);
   }
 
-  function weightedFamily(excludeKey) {
-    const available = tileFamilies.filter((f) => f !== excludeKey);
-    const pool = available.length ? available : tileFamilies;
-    const total = pool.reduce((sum, item) => sum + item.weight, 0);
-    let pick = Math.random() * total;
-    for (const item of pool) {
-      pick -= item.weight;
-      if (pick <= 0) return item;
-    }
-    return pool[0];
+  function sampleWeightedCorner() {
+    const r = Math.random();
+    if (r < 0.3) return choose(cornerPool.slice(0, 4));
+    if (r < 0.52)
+      return choose([
+        cornerPool[0],
+        cornerPool[1],
+        cornerPool[4],
+        cornerPool[5],
+        cornerPool[11],
+        cornerPool[12],
+      ]);
+    if (r < 0.68)
+      return choose([
+        cornerPool[4],
+        cornerPool[5],
+        cornerPool[6],
+        cornerPool[11],
+        cornerPool[12],
+      ]);
+    if (r < 0.83)
+      return choose([
+        cornerPool[7],
+        cornerPool[8],
+        cornerPool[0],
+        cornerPool[1],
+        cornerPool[11],
+      ]);
+    if (r < 0.93)
+      return choose([
+        cornerPool[9],
+        cornerPool[10],
+        cornerPool[0],
+        cornerPool[11],
+      ]);
+    return choose([
+      cornerPool[11],
+      cornerPool[12],
+      cornerPool[0],
+      cornerPool[1],
+    ]);
   }
 
-  function chooseMode(exclude) {
-    const options = gradientModes.filter((m) => m !== exclude);
-    return choose(options.length ? options : gradientModes);
+  function makeCornerSet(excludeSignature) {
+    for (let tries = 0; tries < 40; tries += 1) {
+      const picked = [];
+      while (picked.length < 4) {
+        const candidate = sampleWeightedCorner();
+        if (!picked.some((p) => p.id === candidate.id)) picked.push(candidate);
+      }
+
+      // force variety between corners
+      const hasWarm = picked.some(
+        (p) => p.id.startsWith("y") || p.id.startsWith("m"),
+      );
+      const hasPurple = picked.some(
+        (p) => p.id.startsWith("l") || p.id.startsWith("v"),
+      );
+      const hasBlue = picked.some((p) => p.id.startsWith("b"));
+      if (!hasBlue) picked[0] = choose(cornerPool.slice(0, 4));
+      if (!hasPurple && Math.random() < 0.7)
+        picked[1] = choose([cornerPool[4], cornerPool[5], cornerPool[6]]);
+      if (!hasWarm && Math.random() < 0.55)
+        picked[2] = choose([
+          cornerPool[7],
+          cornerPool[8],
+          cornerPool[9],
+          cornerPool[10],
+        ]);
+
+      const center = choose([
+        centerPool[0],
+        centerPool[1],
+        centerPool[2],
+        centerPool[3],
+        centerPool[0],
+        centerPool[2],
+      ]);
+      const signature = `${picked.map((p) => p.id).join("-")}_${center.id}`;
+      if (signature !== excludeSignature) {
+        return {
+          corners: picked.map((p) => p.color),
+          signature,
+          centerColor: center.color,
+        };
+      }
+    }
+
+    return {
+      corners: [
+        palette.blue2,
+        palette.lavender1,
+        palette.mint0,
+        palette.paperWhite,
+      ],
+      centerColor: palette.iceWhite,
+      signature: "fallback",
+    };
+  }
+
+  function choosePattern(exclude) {
+    const variants = [
+      "cornerBlend",
+      "crossLight",
+      "edgeWash",
+      "centerBloom",
+      "softBands",
+      "diagonalLift",
+    ];
+    const options = variants.filter((v) => v !== exclude);
+    return choose(options.length ? options : variants);
   }
 
   function buildTiles() {
     state.tiles = [];
 
-    const idealCell = clamp(Math.round(width / 5.5), 66, 96);
+    const idealCell = clamp(Math.round(Math.min(width, height) / 5.3), 72, 108);
     const cols = Math.max(4, Math.round(width / idealCell));
     const cell = width / cols;
     const rows = Math.ceil(height / cell) + 1;
     const occupancy = Array.from({ length: rows }, () =>
       Array(cols).fill(false),
     );
-    const refs = Array.from({ length: rows }, () => Array(cols).fill(null));
+    state.refs = Array.from({ length: rows }, () => Array(cols).fill(null));
 
     for (let row = 0; row < rows; row += 1) {
       for (let col = 0; col < cols; col += 1) {
         if (occupancy[row][col]) continue;
 
-        const wide = col < cols - 1 && Math.random() < 0.46;
-        const tall = row < rows - 1 && Math.random() < 0.22;
+        const wide = col < cols - 1 && Math.random() < 0.44;
+        const tall = row < rows - 1 && Math.random() < 0.18;
         const spanX = wide ? 2 : 1;
         const spanY = tall ? 2 : 1;
 
-        const leftTile = col > 0 ? refs[row][col - 1] : null;
-        const upTile = row > 0 ? refs[row - 1][col] : null;
-        const family = weightedFamily(
-          leftTile && upTile && leftTile.family === upTile.family
-            ? leftTile.family
+        const leftTile = col > 0 ? state.refs[row][col - 1] : null;
+        const upTile = row > 0 ? state.refs[row - 1][col] : null;
+        const excludeSig = [leftTile?.signature, upTile?.signature]
+          .filter(Boolean)
+          .join("|");
+        const colorSet = makeCornerSet(excludeSig);
+        const pattern = choosePattern(
+          leftTile && upTile && leftTile.pattern === upTile.pattern
+            ? leftTile.pattern
             : null,
         );
-        const mode = chooseMode(
-          leftTile && upTile && leftTile.mode === upTile.mode
-            ? leftTile.mode
-            : null,
-        );
-        const variant = choose(["soft", "ribbon", "wash", "halo", "beam"]);
 
         const tile = {
-          x: col * cell + rand(-1.0, 1.0),
-          y: row * cell + rand(-1.0, 1.0),
-          w: cell * spanX + rand(-1.8, 1.8),
-          h: cell * spanY + rand(-1.8, 1.8),
-          family,
-          mode,
-          variant,
-          base: family.base,
-          ramp0: family.ramp[0],
-          ramp1: family.ramp[1],
-          ramp2: family.ramp[2],
-          accent0: family.accent[0],
-          accent1: family.accent[1],
-          fillAlpha: rand(0.955, 0.988),
-          tintAlphaA: rand(0.5, 0.76),
-          tintAlphaB: rand(0.4, 0.66),
-          whiteAlpha: rand(0.34, 0.56),
-          accentAlpha: rand(0.12, 0.34),
-          cloudAlpha: rand(0.18, 0.34),
-          edgeAlpha: rand(0.16, 0.28),
+          x: col * cell + rand(-1.2, 1.2),
+          y: row * cell + rand(-1.2, 1.2),
+          w: cell * spanX + rand(-2.0, 2.0),
+          h: cell * spanY + rand(-2.0, 2.0),
+          signature: colorSet.signature,
+          corners: colorSet.corners,
+          centerColor: colorSet.centerColor,
+          pattern,
+          baseAlpha: rand(0.94, 0.985),
+          cornerAlpha: rand(0.46, 0.72),
+          centerAlpha: rand(0.22, 0.42),
+          beamAlpha: rand(0.12, 0.24),
+          edgeAlpha: rand(0.12, 0.24),
           phase: rand(0, Math.PI * 2),
           seed0: Math.random(),
           seed1: Math.random(),
           seed2: Math.random(),
+          seed3: Math.random(),
         };
 
         state.tiles.push(tile);
@@ -209,14 +275,14 @@
         for (let ry = row; ry < Math.min(rows, row + spanY); ry += 1) {
           for (let cx = col; cx < Math.min(cols, col + spanX); cx += 1) {
             occupancy[ry][cx] = true;
-            refs[ry][cx] = tile;
+            state.refs[ry][cx] = tile;
           }
         }
       }
     }
 
     const tTile =
-      state.tiles[Math.floor(state.tiles.length * 0.63)] ||
+      state.tiles[Math.floor(state.tiles.length * 0.62)] ||
       state.tiles[state.tiles.length - 1];
     if (tTile) {
       state.tAnchor = {
@@ -241,242 +307,187 @@
         angle: rand(-Math.PI * 0.55, Math.PI * 0.55),
         seed: rand(0, Math.PI * 2),
         c0: choose([
-          "rgba(214,240,255,0.18)",
-          "rgba(198,231,252,0.16)",
-          "rgba(182,222,251,0.14)",
+          "rgba(216,241,255,0.16)",
+          "rgba(197,232,252,0.14)",
+          "rgba(186,226,250,0.12)",
         ]),
         c1: choose([
-          "rgba(154,211,247,0.14)",
-          "rgba(136,201,242,0.12)",
-          "rgba(173,223,250,0.10)",
+          "rgba(162,214,248,0.12)",
+          "rgba(144,206,244,0.10)",
+          "rgba(181,225,250,0.08)",
         ]),
       });
     }
   }
 
-  function makeGradientForTile(tile) {
+  function drawCornerConvergence(tile) {
     const {
       x,
       y,
       w,
       h,
-      mode,
-      ramp0,
-      ramp1,
-      ramp2,
-      tintAlphaA,
-      tintAlphaB,
-      whiteAlpha,
+      corners,
+      centerColor,
+      cornerAlpha,
+      centerAlpha,
       seed0,
       seed1,
+      seed2,
+      seed3,
     } = tile;
-    let grad;
+    const r = Math.max(w, h) * (0.94 + seed0 * 0.28);
+    const positions = [
+      [x, y],
+      [x + w, y],
+      [x + w, y + h],
+      [x, y + h],
+    ];
 
-    if (mode === "h") {
-      grad = baseCtx.createLinearGradient(
-        x,
-        y + h * seed0,
-        x,
-        y + h * (0.2 + seed1 * 0.8),
-      );
-      grad.addColorStop(0, rgbaWithAlpha(ramp1, tintAlphaA));
-      grad.addColorStop(0.28, rgbaWithAlpha(ramp0, whiteAlpha));
-      grad.addColorStop(0.62, rgbaWithAlpha(ramp2, tintAlphaB));
-      grad.addColorStop(1, rgbaWithAlpha(ramp1, tintAlphaA * 0.9));
-      return grad;
-    }
+    positions.forEach(([cx, cy], index) => {
+      const grad = baseCtx.createRadialGradient(cx, cy, 0, cx, cy, r);
+      const strength =
+        cornerAlpha * (0.88 + [seed0, seed1, seed2, seed3][index] * 0.26);
+      grad.addColorStop(0, rgbaWithAlpha(corners[index], strength));
+      grad.addColorStop(0.34, rgbaWithAlpha(corners[index], strength * 0.62));
+      grad.addColorStop(0.72, rgbaWithAlpha(corners[index], strength * 0.12));
+      grad.addColorStop(1, "rgba(255,255,255,0)");
+      baseCtx.fillStyle = grad;
+      baseCtx.fillRect(x, y, w, h);
+    });
 
-    if (mode === "v") {
-      grad = baseCtx.createLinearGradient(
-        x + w * seed0,
-        y,
-        x + w * (0.18 + seed1 * 0.78),
-        y,
-      );
-      grad.addColorStop(0, rgbaWithAlpha(ramp1, tintAlphaA));
-      grad.addColorStop(0.26, rgbaWithAlpha(ramp0, whiteAlpha));
-      grad.addColorStop(0.58, rgbaWithAlpha(ramp2, tintAlphaB));
-      grad.addColorStop(1, rgbaWithAlpha(ramp1, tintAlphaA * 0.88));
-      return grad;
-    }
-
-    if (mode === "diagA" || mode === "diagB") {
-      grad =
-        mode === "diagA"
-          ? baseCtx.createLinearGradient(x, y, x + w, y + h)
-          : baseCtx.createLinearGradient(x + w, y, x, y + h);
-      grad.addColorStop(0, rgbaWithAlpha(ramp1, tintAlphaA));
-      grad.addColorStop(0.22, rgbaWithAlpha(ramp0, whiteAlpha));
-      grad.addColorStop(0.52, rgbaWithAlpha(ramp2, tintAlphaB));
-      grad.addColorStop(0.84, rgbaWithAlpha(ramp0, whiteAlpha * 0.9));
-      grad.addColorStop(1, rgbaWithAlpha(ramp1, tintAlphaA * 0.88));
-      return grad;
-    }
-
-    if (mode === "corner") {
-      const gx = x + w * (seed0 > 0.5 ? 0.1 : 0.9);
-      const gy = y + h * (seed1 > 0.5 ? 0.1 : 0.9);
-      grad = baseCtx.createRadialGradient(
-        gx,
-        gy,
-        0,
-        gx,
-        gy,
-        Math.max(w, h) * 1.05,
-      );
-      grad.addColorStop(0, rgbaWithAlpha(ramp0, whiteAlpha));
-      grad.addColorStop(0.22, rgbaWithAlpha(ramp2, tintAlphaB));
-      grad.addColorStop(0.62, rgbaWithAlpha(ramp1, tintAlphaA));
-      grad.addColorStop(1, rgbaWithAlpha(ramp0, 0.08));
-      return grad;
-    }
-
-    if (mode === "sweep") {
-      grad = baseCtx.createLinearGradient(
-        x,
-        y + h * (0.12 + seed0 * 0.2),
-        x + w,
-        y + h * (0.88 - seed1 * 0.2),
-      );
-      grad.addColorStop(0, rgbaWithAlpha(ramp0, whiteAlpha * 0.95));
-      grad.addColorStop(0.18, rgbaWithAlpha(ramp2, tintAlphaB * 0.94));
-      grad.addColorStop(0.5, rgbaWithAlpha(ramp1, tintAlphaA));
-      grad.addColorStop(0.82, rgbaWithAlpha(ramp0, whiteAlpha));
-      grad.addColorStop(1, rgbaWithAlpha(ramp2, tintAlphaB * 0.86));
-      return grad;
-    }
-
-    if (mode === "band") {
-      grad = baseCtx.createLinearGradient(x, y, x, y + h);
-      grad.addColorStop(0, rgbaWithAlpha(ramp1, tintAlphaA * 0.88));
-      grad.addColorStop(0.18, rgbaWithAlpha(ramp0, whiteAlpha));
-      grad.addColorStop(0.36, rgbaWithAlpha(ramp2, tintAlphaB));
-      grad.addColorStop(0.54, rgbaWithAlpha(ramp0, whiteAlpha * 0.98));
-      grad.addColorStop(0.74, rgbaWithAlpha(ramp1, tintAlphaA * 0.84));
-      grad.addColorStop(1, rgbaWithAlpha(ramp0, whiteAlpha * 0.92));
-      return grad;
-    }
-
-    grad = baseCtx.createLinearGradient(x, y, x + w, y);
-    grad.addColorStop(0, rgbaWithAlpha(ramp0, whiteAlpha));
-    grad.addColorStop(0.26, rgbaWithAlpha(ramp1, tintAlphaA));
-    grad.addColorStop(0.5, rgbaWithAlpha(ramp0, whiteAlpha * 0.96));
-    grad.addColorStop(0.72, rgbaWithAlpha(ramp2, tintAlphaB));
-    grad.addColorStop(1, rgbaWithAlpha(ramp0, whiteAlpha));
-    return grad;
+    const cx = x + w * (0.48 + (seed0 - 0.5) * 0.1);
+    const cy = y + h * (0.49 + (seed1 - 0.5) * 0.1);
+    const center = baseCtx.createRadialGradient(
+      cx,
+      cy,
+      0,
+      cx,
+      cy,
+      Math.max(w, h) * 0.72,
+    );
+    center.addColorStop(0, rgbaWithAlpha(centerColor, centerAlpha * 1.18));
+    center.addColorStop(0.28, rgbaWithAlpha(centerColor, centerAlpha * 0.74));
+    center.addColorStop(0.72, rgbaWithAlpha(centerColor, centerAlpha * 0.14));
+    center.addColorStop(1, "rgba(255,255,255,0)");
+    baseCtx.fillStyle = center;
+    baseCtx.fillRect(x, y, w, h);
   }
 
-  function paintTile(tile) {
+  function drawPatternAccent(tile) {
     const {
       x,
       y,
       w,
       h,
-      base,
-      cloudAlpha,
-      edgeAlpha,
-      ramp0,
-      ramp1,
-      ramp2,
-      accent0,
-      accent1,
-      accentAlpha,
-      mode,
-      variant,
+      pattern,
+      corners,
+      centerColor,
+      beamAlpha,
       seed0,
       seed1,
       seed2,
     } = tile;
+    const accent = corners[(seed2 * 4) | 0];
 
-    baseCtx.save();
-    baseCtx.globalAlpha = tile.fillAlpha;
-    baseCtx.fillStyle = base;
-    baseCtx.fillRect(x, y, w, h);
-    baseCtx.restore();
-
-    baseCtx.save();
-    baseCtx.fillStyle = makeGradientForTile(tile);
-    baseCtx.fillRect(x, y, w, h);
-    baseCtx.restore();
-
-    if (variant === "ribbon" || mode === "band" || mode === "cross") {
-      const ribbon = baseCtx.createLinearGradient(
+    if (pattern === "crossLight" || pattern === "softBands") {
+      const bandH = baseCtx.createLinearGradient(
         x,
-        y + h * (0.12 + seed0 * 0.5),
+        y + h * (0.18 + seed0 * 0.46),
         x,
-        y + h * (0.32 + seed1 * 0.58),
+        y + h * (0.42 + seed1 * 0.34),
       );
-      ribbon.addColorStop(0, "rgba(255,255,255,0)");
-      ribbon.addColorStop(0.2, rgbaWithAlpha(ramp0, 0.42));
-      ribbon.addColorStop(0.48, rgbaWithAlpha(ramp2, 0.34));
-      ribbon.addColorStop(0.78, rgbaWithAlpha(ramp0, 0.4));
-      ribbon.addColorStop(1, "rgba(255,255,255,0)");
-      baseCtx.fillStyle = ribbon;
+      bandH.addColorStop(0, "rgba(255,255,255,0)");
+      bandH.addColorStop(
+        0.24,
+        rgbaWithAlpha(palette.paperWhite, beamAlpha * 0.92),
+      );
+      bandH.addColorStop(0.5, rgbaWithAlpha(accent, beamAlpha * 0.72));
+      bandH.addColorStop(0.78, rgbaWithAlpha(centerColor, beamAlpha * 0.58));
+      bandH.addColorStop(1, "rgba(255,255,255,0)");
+      baseCtx.fillStyle = bandH;
       baseCtx.fillRect(x, y, w, h);
     }
 
-    if (variant === "beam" || mode === "v" || mode === "cross") {
-      const beam = baseCtx.createLinearGradient(
-        x + w * (0.14 + seed2 * 0.58),
+    if (pattern === "edgeWash" || pattern === "crossLight") {
+      const bandV = baseCtx.createLinearGradient(
+        x + w * (0.16 + seed1 * 0.48),
         y,
-        x + w * (0.38 + seed1 * 0.46),
+        x + w * (0.32 + seed2 * 0.42),
         y,
       );
-      beam.addColorStop(0, "rgba(255,255,255,0)");
-      beam.addColorStop(0.26, rgbaWithAlpha(ramp0, 0.32));
-      beam.addColorStop(0.52, rgbaWithAlpha(accent1, 0.28));
-      beam.addColorStop(0.8, rgbaWithAlpha(ramp0, 0.34));
-      beam.addColorStop(1, "rgba(255,255,255,0)");
-      baseCtx.fillStyle = beam;
+      bandV.addColorStop(0, "rgba(255,255,255,0)");
+      bandV.addColorStop(0.22, rgbaWithAlpha(centerColor, beamAlpha * 0.64));
+      bandV.addColorStop(0.52, rgbaWithAlpha(accent, beamAlpha * 0.76));
+      bandV.addColorStop(
+        0.82,
+        rgbaWithAlpha(palette.paperWhite, beamAlpha * 0.88),
+      );
+      bandV.addColorStop(1, "rgba(255,255,255,0)");
+      baseCtx.fillStyle = bandV;
       baseCtx.fillRect(x, y, w, h);
     }
 
-    if (variant === "halo" || mode === "corner" || mode === "sweep") {
-      const glowX = x + w * (0.15 + seed0 * 0.7);
-      const glowY = y + h * (0.15 + seed1 * 0.7);
-      const radial = baseCtx.createRadialGradient(
-        glowX,
-        glowY,
+    if (pattern === "diagonalLift" || pattern === "cornerBlend") {
+      const diag = baseCtx.createLinearGradient(
+        x,
+        y + h * 0.1,
+        x + w,
+        y + h * 0.9,
+      );
+      diag.addColorStop(0, "rgba(255,255,255,0)");
+      diag.addColorStop(0.22, rgbaWithAlpha(corners[0], beamAlpha * 0.46));
+      diag.addColorStop(
+        0.48,
+        rgbaWithAlpha(palette.paperWhite, beamAlpha * 0.74),
+      );
+      diag.addColorStop(0.76, rgbaWithAlpha(corners[2], beamAlpha * 0.44));
+      diag.addColorStop(1, "rgba(255,255,255,0)");
+      baseCtx.fillStyle = diag;
+      baseCtx.fillRect(x, y, w, h);
+    }
+
+    if (pattern === "centerBloom") {
+      const bloom = baseCtx.createRadialGradient(
+        x + w * 0.52,
+        y + h * 0.5,
         0,
-        glowX,
-        glowY,
-        Math.max(w, h) * (0.52 + seed2 * 0.42),
+        x + w * 0.52,
+        y + h * 0.5,
+        Math.max(w, h) * 0.52,
       );
-      radial.addColorStop(0, rgbaWithAlpha(accent0, accentAlpha * 0.96));
-      radial.addColorStop(0.26, rgbaWithAlpha(accent1, accentAlpha * 0.88));
-      radial.addColorStop(0.68, rgbaWithAlpha(ramp0, cloudAlpha * 0.36));
-      radial.addColorStop(1, "rgba(255,255,255,0)");
-      baseCtx.save();
-      baseCtx.globalCompositeOperation = "screen";
-      baseCtx.fillStyle = radial;
+      bloom.addColorStop(
+        0,
+        rgbaWithAlpha(palette.paperWhite, beamAlpha * 0.95),
+      );
+      bloom.addColorStop(0.32, rgbaWithAlpha(centerColor, beamAlpha * 0.56));
+      bloom.addColorStop(0.74, rgbaWithAlpha(accent, beamAlpha * 0.18));
+      bloom.addColorStop(1, "rgba(255,255,255,0)");
+      baseCtx.fillStyle = bloom;
       baseCtx.fillRect(x, y, w, h);
-      baseCtx.restore();
     }
+  }
+
+  function paintTile(tile) {
+    const { x, y, w, h, edgeAlpha } = tile;
+
+    baseCtx.save();
+    baseCtx.fillStyle = rgbaWithAlpha(palette.softWhite, tile.baseAlpha);
+    baseCtx.fillRect(x, y, w, h);
+    drawCornerConvergence(tile);
+    drawPatternAccent(tile);
+    baseCtx.restore();
 
     const sideSheen = baseCtx.createLinearGradient(x, y, x + w, y);
-    sideSheen.addColorStop(0, "rgba(255,255,255,0.04)");
-    sideSheen.addColorStop(0.22, rgbaWithAlpha(ramp0, 0.28));
-    sideSheen.addColorStop(0.46, rgbaWithAlpha(ramp1, 0.16));
-    sideSheen.addColorStop(0.74, rgbaWithAlpha(accent1, accentAlpha * 0.9));
+    sideSheen.addColorStop(0, "rgba(255,255,255,0.03)");
+    sideSheen.addColorStop(0.28, "rgba(255,255,255,0.11)");
+    sideSheen.addColorStop(0.52, "rgba(204,230,246,0.08)");
+    sideSheen.addColorStop(0.76, "rgba(255,255,255,0.10)");
     sideSheen.addColorStop(1, "rgba(255,255,255,0.03)");
     baseCtx.fillStyle = sideSheen;
     baseCtx.fillRect(x, y, w, h);
 
-    const cloud = baseCtx.createLinearGradient(
-      x,
-      y + h * (0.14 + seed1 * 0.28),
-      x,
-      y + h * (0.68 + seed0 * 0.2),
-    );
-    cloud.addColorStop(0, "rgba(255,255,255,0)");
-    cloud.addColorStop(0.36, rgbaWithAlpha(ramp0, cloudAlpha * 0.92));
-    cloud.addColorStop(0.58, rgbaWithAlpha(ramp2, cloudAlpha * 0.88));
-    cloud.addColorStop(1, "rgba(255,255,255,0)");
-    baseCtx.fillStyle = cloud;
-    baseCtx.fillRect(x, y, w, h);
-
     baseCtx.save();
-    baseCtx.strokeStyle = `rgba(228, 236, 238, ${edgeAlpha})`;
+    baseCtx.strokeStyle = `rgba(229, 237, 239, ${edgeAlpha})`;
     baseCtx.lineWidth = 1;
     baseCtx.strokeRect(
       Math.round(x) + 0.5,
@@ -487,7 +498,7 @@
     baseCtx.restore();
 
     baseCtx.save();
-    baseCtx.strokeStyle = rgbaWithAlpha(palette.seamShadow, edgeAlpha * 0.86);
+    baseCtx.strokeStyle = rgbaWithAlpha(palette.seamShadow, edgeAlpha * 0.88);
     baseCtx.lineWidth = 0.8;
     baseCtx.beginPath();
     baseCtx.moveTo(x + 0.5, y + h - 0.5);
@@ -503,8 +514,8 @@
 
     const bg = baseCtx.createLinearGradient(0, 0, width, height);
     bg.addColorStop(0, palette.bg0);
-    bg.addColorStop(0.35, palette.paperWhite);
-    bg.addColorStop(0.7, palette.bg2);
+    bg.addColorStop(0.34, palette.paperWhite);
+    bg.addColorStop(0.68, palette.bg2);
     bg.addColorStop(1, palette.bg1);
     baseCtx.fillStyle = bg;
     baseCtx.fillRect(0, 0, width, height);
@@ -514,7 +525,6 @@
 
   function paintGrain() {
     grainCtx.clearRect(0, 0, width, height);
-
     const dots = Math.round((width * height) / 210);
     for (let i = 0; i < dots; i += 1) {
       const x = Math.random() * width;
