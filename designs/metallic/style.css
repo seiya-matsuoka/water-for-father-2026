@@ -33,25 +33,25 @@ body {
   background:
     radial-gradient(
       circle at 14% 14%,
-      rgba(138, 185, 255, 0.18),
-      transparent 28%
+      rgba(138, 185, 255, 0.22),
+      transparent 30%
     ),
     radial-gradient(
       circle at 84% 22%,
-      rgba(255, 221, 157, 0.08),
-      transparent 20%
+      rgba(255, 221, 157, 0.1),
+      transparent 22%
     ),
     radial-gradient(
       circle at 76% 82%,
-      rgba(177, 199, 255, 0.13),
-      transparent 26%
+      rgba(177, 199, 255, 0.16),
+      transparent 28%
     ),
     radial-gradient(
       circle at 26% 78%,
-      rgba(121, 126, 232, 0.09),
-      transparent 22%
+      rgba(121, 126, 232, 0.12),
+      transparent 24%
     ),
-    linear-gradient(180deg, #01040a 0%, #091421 30%, #102133 56%, #02060d 100%);
+    linear-gradient(180deg, #01040a 0%, #091421 24%, #12253a 52%, #050b14 100%);
 }
 
 #metallic-canvas {
@@ -70,15 +70,15 @@ body {
   background:
     radial-gradient(
       circle at 50% 50%,
-      transparent 48%,
-      rgba(0, 0, 0, 0.34) 94%
+      transparent 46%,
+      rgba(0, 0, 0, 0.28) 96%
     ),
     linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.04),
-      transparent 16%,
-      transparent 82%,
-      rgba(0, 0, 0, 0.24)
+      rgba(255, 255, 255, 0.05),
+      transparent 15%,
+      transparent 84%,
+      rgba(0, 0, 0, 0.22)
     );
   mix-blend-mode: multiply;
 }
@@ -86,7 +86,7 @@ body {
 .grain-layer {
   position: absolute;
   inset: 0;
-  opacity: 0.05;
+  opacity: 0.045;
   background-image: radial-gradient(
     circle at 1px 1px,
     rgba(255, 255, 255, 0.88) 0.56px,

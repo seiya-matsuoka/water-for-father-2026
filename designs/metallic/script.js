@@ -266,11 +266,12 @@
 
   function drawBackdrop(width, height, time) {
     const gradient = ctx.createLinearGradient(0, 0, width, height);
-    gradient.addColorStop(0, "#01040a");
-    gradient.addColorStop(0.22, "#081322");
-    gradient.addColorStop(0.5, "#0d1c30");
-    gradient.addColorStop(0.74, "#07111f");
-    gradient.addColorStop(1, "#010309");
+    gradient.addColorStop(0, "#010309");
+    gradient.addColorStop(0.18, "#07101d");
+    gradient.addColorStop(0.42, "#0f2136");
+    gradient.addColorStop(0.62, "#132941");
+    gradient.addColorStop(0.82, "#06101d");
+    gradient.addColorStop(1, "#010207");
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, width, height);
 
@@ -278,40 +279,58 @@
     ctx.globalCompositeOperation = "screen";
 
     const orbGlow = ctx.createRadialGradient(
-      width * (0.52 + state.rotation.y * 0.032),
-      height * (0.5 + state.rotation.x * 0.052),
+      width * (0.52 + state.rotation.y * 0.035),
+      height * (0.5 + state.rotation.x * 0.055),
       0,
       width * 0.52,
       height * 0.5,
-      Math.max(width, height) * 0.82,
+      Math.max(width, height) * 0.88,
     );
-    orbGlow.addColorStop(0, "rgba(255,255,255,0.12)");
-    orbGlow.addColorStop(0.16, "rgba(206,226,255,0.12)");
-    orbGlow.addColorStop(0.4, "rgba(126,171,229,0.08)");
-    orbGlow.addColorStop(0.66, "rgba(90,103,205,0.035)");
+    orbGlow.addColorStop(0, "rgba(255,255,255,0.16)");
+    orbGlow.addColorStop(0.12, "rgba(224,236,255,0.16)");
+    orbGlow.addColorStop(0.3, "rgba(171,203,246,0.11)");
+    orbGlow.addColorStop(0.5, "rgba(115,165,228,0.08)");
+    orbGlow.addColorStop(0.68, "rgba(104,104,186,0.045)");
+    orbGlow.addColorStop(0.8, "rgba(255,214,150,0.028)");
     orbGlow.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = orbGlow;
     ctx.fillRect(0, 0, width, height);
 
     const sweep = ctx.createLinearGradient(
-      width * 0.02,
+      -width * 0.2,
       0,
-      width * 0.94,
+      width * 1.12,
       height,
     );
     sweep.addColorStop(0, "rgba(255,255,255,0)");
-    sweep.addColorStop(0.24, "rgba(191,217,255,0.18)");
-    sweep.addColorStop(0.42, "rgba(255,255,255,0.34)");
-    sweep.addColorStop(0.64, "rgba(255,220,154,0.1)");
-    sweep.addColorStop(0.78, "rgba(149,155,255,0.08)");
+    sweep.addColorStop(0.18, "rgba(157,197,255,0.16)");
+    sweep.addColorStop(0.32, "rgba(255,255,255,0.42)");
+    sweep.addColorStop(0.48, "rgba(224,235,248,0.26)");
+    sweep.addColorStop(0.62, "rgba(255,219,158,0.12)");
+    sweep.addColorStop(0.74, "rgba(133,133,226,0.1)");
+    sweep.addColorStop(0.88, "rgba(255,255,255,0.18)");
     sweep.addColorStop(1, "rgba(255,255,255,0)");
-    ctx.globalAlpha = 0.7;
+    ctx.globalAlpha = 0.82;
     ctx.translate(
-      Math.sin(time * 0.13) * width * 0.065,
-      Math.cos(time * 0.1) * height * 0.02,
+      Math.sin(time * 0.13) * width * 0.07,
+      Math.cos(time * 0.1) * height * 0.025,
     );
     ctx.fillStyle = sweep;
-    ctx.fillRect(-width * 0.28, -height * 0.12, width * 1.6, height * 1.28);
+    ctx.fillRect(-width * 0.42, -height * 0.16, width * 1.92, height * 1.36);
+
+    const chromeFalloff = ctx.createLinearGradient(
+      0,
+      -height * 0.12,
+      0,
+      height * 1.08,
+    );
+    chromeFalloff.addColorStop(0, "rgba(255,255,255,0.1)");
+    chromeFalloff.addColorStop(0.16, "rgba(255,255,255,0)");
+    chromeFalloff.addColorStop(0.84, "rgba(255,255,255,0)");
+    chromeFalloff.addColorStop(1, "rgba(0,0,0,0.2)");
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = chromeFalloff;
+    ctx.fillRect(0, -height * 0.12, width, height * 1.2);
     ctx.restore();
   }
 
@@ -322,26 +341,26 @@
           width *
           (0.14 + Math.cos(time * 0.2) * 0.025 + state.rotation.y * 0.012),
         y: height * (0.14 + state.rotation.x * 0.022),
-        r: Math.max(width, height) * 0.26,
-        color: "rgba(123, 184, 255, 0.24)",
+        r: Math.max(width, height) * 0.3,
+        color: "rgba(123, 184, 255, 0.28)",
       },
       {
         x: width * (0.84 + state.rotation.y * 0.012),
         y: height * (0.78 + Math.sin(time * 0.17) * 0.03),
-        r: Math.max(width, height) * 0.3,
-        color: "rgba(203, 226, 255, 0.18)",
+        r: Math.max(width, height) * 0.34,
+        color: "rgba(203, 226, 255, 0.2)",
       },
       {
         x: width * (0.72 + state.rotation.y * 0.014),
         y: height * 0.24,
-        r: Math.max(width, height) * 0.2,
-        color: "rgba(255, 212, 132, 0.11)",
+        r: Math.max(width, height) * 0.22,
+        color: "rgba(255, 212, 132, 0.12)",
       },
       {
         x: width * 0.28,
         y: height * (0.72 + state.rotation.x * 0.02),
-        r: Math.max(width, height) * 0.18,
-        color: "rgba(151, 149, 255, 0.085)",
+        r: Math.max(width, height) * 0.22,
+        color: "rgba(151, 149, 255, 0.11)",
       },
     ];
 
@@ -358,7 +377,8 @@
         field.r,
       );
       glow.addColorStop(0, field.color);
-      glow.addColorStop(0.36, field.color.replace(/0\.(\d+)\)/, "0.07)"));
+      glow.addColorStop(0.24, field.color.replace(/0\.(\d+)\)/, "0.11)"));
+      glow.addColorStop(0.56, field.color.replace(/0\.(\d+)\)/, "0.05)"));
       glow.addColorStop(1, "rgba(0,0,0,0)");
       ctx.fillStyle = glow;
       ctx.fillRect(
@@ -369,54 +389,74 @@
       );
     });
 
+    const mirrorSweep = ctx.createLinearGradient(
+      width * -0.18,
+      0,
+      width * 1.08,
+      height,
+    );
+    mirrorSweep.addColorStop(0, "rgba(255,255,255,0)");
+    mirrorSweep.addColorStop(0.22, "rgba(255,255,255,0.06)");
+    mirrorSweep.addColorStop(0.4, "rgba(255,255,255,0.16)");
+    mirrorSweep.addColorStop(0.5, "rgba(255,255,255,0.24)");
+    mirrorSweep.addColorStop(0.6, "rgba(189,220,255,0.1)");
+    mirrorSweep.addColorStop(0.72, "rgba(255,221,171,0.06)");
+    mirrorSweep.addColorStop(0.84, "rgba(255,255,255,0.04)");
+    mirrorSweep.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = mirrorSweep;
+    ctx.fillRect(-width * 0.2, -height * 0.12, width * 1.4, height * 1.22);
+
     ctx.restore();
   }
 
   function drawBand(spec, index, width, height, time) {
-    const topY = -height * 0.62;
-    const bottomY = height * 1.62;
-    const steps = Math.max(46, Math.floor(height / 22));
+    const topY = -height * 0.94;
+    const bottomY = height * 1.94;
+    const steps = Math.max(64, Math.floor(height / 16));
     const stepSize = (bottomY - topY) / steps;
 
-    const baseCenterX = width * (-0.38 + spec.yOffset * 0.72);
+    const baseCenterX = width * (-0.42 + spec.yOffset * 0.76);
     const motionShift =
-      state.rotation.y * width * 0.54 +
-      Math.sin(time * (0.14 + index * 0.03)) * width * 0.052;
-    const verticalShift = state.rotation.x * height * 0.26;
-    const bandWidthBase = Math.max(width, height) * spec.thickness * 1.08;
+      state.rotation.y * width * 0.62 +
+      Math.sin(time * (0.14 + index * 0.03)) * width * 0.06;
+    const verticalShift = state.rotation.x * height * 0.32;
+    const bandWidthBase = Math.max(width, height) * spec.thickness * 1.22;
 
     const leftPoints = [];
     const rightPoints = [];
 
     for (let step = 0; step <= steps; step += 1) {
       const y = topY + step * stepSize;
-      const normY = (y + height * 0.34) / (height * 1.68);
-      const sphereCurve = Math.sin((normY - 0.07) * Math.PI * 1.14);
+      const normY = (y + height * 0.42) / (height * 2.1);
+      const sphereCurve = Math.sin((normY - 0.06) * Math.PI * 1.06);
       const diagonal = baseCenterX + y * spec.slope;
       const wobble =
         Math.sin(
-          normY * Math.PI * spec.freq * 3.4 + time * spec.speed + index * 1.8,
+          normY * Math.PI * spec.freq * 3.6 + time * spec.speed + index * 1.8,
         ) *
           width *
           spec.amp +
         Math.cos(
-          normY * Math.PI * (spec.freq * 1.9) -
+          normY * Math.PI * (spec.freq * 2.1) -
             time * (spec.speed * 0.5) +
             index * 1.3,
         ) *
           width *
           spec.amp *
-          0.52;
+          0.56;
       const centerX =
         diagonal +
         motionShift +
         wobble +
-        sphereCurve * width * state.rotation.y * 0.23;
-      const widthPulse = 1 + Math.sin(time * 0.5 + normY * 10 + index) * 0.11;
-      const sphereCompression = 1 - Math.abs(normY - 0.5) * 0.08;
+        sphereCurve * width * state.rotation.y * 0.26;
+      const widthPulse = 1 + Math.sin(time * 0.5 + normY * 11 + index) * 0.12;
+      const edgeBlend = easeOutCubic(
+        1 - Math.min(1, Math.abs(normY - 0.5) / 0.52),
+      );
+      const sphereCompression = 0.96 + edgeBlend * 0.08;
       const half = bandWidthBase * widthPulse * sphereCompression * 0.5;
       const edgeWave =
-        Math.sin(time * 0.82 + normY * 13 + index * 2.2) * width * 0.012;
+        Math.sin(time * 0.82 + normY * 13 + index * 2.2) * width * 0.014;
 
       leftPoints.push({ x: centerX - half - edgeWave, y: y + verticalShift });
       rightPoints.push({ x: centerX + half + edgeWave, y: y + verticalShift });
@@ -435,59 +475,63 @@
       bottomY,
     );
     gradient.addColorStop(0, spec.colors[0]);
-    gradient.addColorStop(0.14, spec.colors[1]);
-    gradient.addColorStop(0.42, spec.colors[2]);
+    gradient.addColorStop(0.12, spec.colors[1]);
+    gradient.addColorStop(0.34, "#ffffff");
+    gradient.addColorStop(0.48, spec.colors[2]);
     gradient.addColorStop(0.72, spec.colors[3]);
     gradient.addColorStop(1, spec.colors[4]);
 
-    ctx.globalAlpha = spec.alpha;
+    ctx.globalAlpha = Math.min(1, spec.alpha * 1.03);
     ctx.fillStyle = gradient;
-    ctx.fillRect(-width * 0.45, -height * 0.4, width * 1.9, height * 1.9);
+    ctx.fillRect(-width * 0.78, -height * 0.72, width * 2.56, height * 2.44);
 
     ctx.globalCompositeOperation = "screen";
     const sheen = ctx.createLinearGradient(
-      width * (0.02 + state.rotation.y * 0.04),
-      height * 0.02,
-      width * (0.98 + state.rotation.y * 0.045),
-      height * 0.98,
+      width * (-0.12 + state.rotation.y * 0.05),
+      height * -0.04,
+      width * (1.1 + state.rotation.y * 0.05),
+      height * 1.06,
     );
     sheen.addColorStop(0, "rgba(255,255,255,0)");
-    sheen.addColorStop(0.18, "rgba(255,255,255,0.14)");
-    sheen.addColorStop(0.34, "rgba(255,255,255,0.66)");
-    sheen.addColorStop(0.48, "rgba(204,226,255,0.34)");
-    sheen.addColorStop(0.62, "rgba(255,213,136,0.18)");
-    sheen.addColorStop(0.74, "rgba(165,156,255,0.12)");
+    sheen.addColorStop(0.16, "rgba(255,255,255,0.18)");
+    sheen.addColorStop(0.3, "rgba(255,255,255,0.76)");
+    sheen.addColorStop(0.4, "rgba(255,255,255,0.2)");
+    sheen.addColorStop(0.48, "rgba(204,226,255,0.42)");
+    sheen.addColorStop(0.6, "rgba(255,213,136,0.2)");
+    sheen.addColorStop(0.72, "rgba(165,156,255,0.14)");
+    sheen.addColorStop(0.84, "rgba(255,255,255,0.1)");
     sheen.addColorStop(1, "rgba(255,255,255,0)");
     ctx.fillStyle = sheen;
-    ctx.fillRect(-width * 0.25, -height * 0.1, width * 1.6, height * 1.2);
+    ctx.fillRect(-width * 0.42, -height * 0.2, width * 2, height * 1.42);
 
     ctx.globalCompositeOperation = "overlay";
     const tint = ctx.createLinearGradient(0, 0, width, height);
-    tint.addColorStop(0, "rgba(125, 176, 255, 0.22)");
-    tint.addColorStop(0.28, "rgba(232, 239, 248, 0.16)");
-    tint.addColorStop(0.56, "rgba(255, 226, 182, 0.1)");
-    tint.addColorStop(0.74, "rgba(132, 144, 255, 0.11)");
+    tint.addColorStop(0, "rgba(125, 176, 255, 0.24)");
+    tint.addColorStop(0.24, "rgba(232, 239, 248, 0.18)");
+    tint.addColorStop(0.52, "rgba(255, 226, 182, 0.12)");
+    tint.addColorStop(0.72, "rgba(132, 144, 255, 0.14)");
     tint.addColorStop(1, "rgba(255,255,255,0)");
     ctx.fillStyle = tint;
-    ctx.fillRect(-width * 0.15, 0, width * 1.3, height);
+    ctx.fillRect(-width * 0.3, -height * 0.06, width * 1.7, height * 1.12);
 
     ctx.globalCompositeOperation = "screen";
     const specularCore = ctx.createLinearGradient(
-      width * (-0.04 + state.rotation.y * 0.025),
-      height * 0.04,
-      width * (1.02 + state.rotation.y * 0.03),
-      height * 0.96,
+      width * (-0.1 + state.rotation.y * 0.03),
+      height * -0.02,
+      width * (1.12 + state.rotation.y * 0.035),
+      height * 1.02,
     );
     specularCore.addColorStop(0, "rgba(255,255,255,0)");
-    specularCore.addColorStop(0.22, "rgba(255,255,255,0.08)");
-    specularCore.addColorStop(0.42, "rgba(255,255,255,0.3)");
-    specularCore.addColorStop(0.5, "rgba(255,255,255,0.78)");
-    specularCore.addColorStop(0.56, "rgba(199,224,255,0.26)");
-    specularCore.addColorStop(0.66, "rgba(255,219,162,0.14)");
-    specularCore.addColorStop(0.78, "rgba(151,145,255,0.12)");
+    specularCore.addColorStop(0.18, "rgba(255,255,255,0.12)");
+    specularCore.addColorStop(0.34, "rgba(255,255,255,0.36)");
+    specularCore.addColorStop(0.44, "rgba(255,255,255,0.96)");
+    specularCore.addColorStop(0.5, "rgba(255,255,255,0.22)");
+    specularCore.addColorStop(0.58, "rgba(199,224,255,0.34)");
+    specularCore.addColorStop(0.68, "rgba(255,219,162,0.18)");
+    specularCore.addColorStop(0.8, "rgba(151,145,255,0.15)");
     specularCore.addColorStop(1, "rgba(255,255,255,0)");
     ctx.fillStyle = specularCore;
-    ctx.fillRect(-width * 0.22, -height * 0.08, width * 1.52, height * 1.16);
+    ctx.fillRect(-width * 0.36, -height * 0.16, width * 1.86, height * 1.34);
 
     ctx.globalCompositeOperation = "destination-in";
     const endFade = ctx.createLinearGradient(
@@ -497,31 +541,33 @@
       bottomY + verticalShift,
     );
     endFade.addColorStop(0, "rgba(255,255,255,0)");
-    endFade.addColorStop(0.08, "rgba(255,255,255,0.38)");
-    endFade.addColorStop(0.14, "rgba(255,255,255,0.95)");
-    endFade.addColorStop(0.86, "rgba(255,255,255,0.95)");
-    endFade.addColorStop(0.92, "rgba(255,255,255,0.38)");
+    endFade.addColorStop(0.12, "rgba(255,255,255,0.32)");
+    endFade.addColorStop(0.2, "rgba(255,255,255,0.86)");
+    endFade.addColorStop(0.28, "rgba(255,255,255,0.98)");
+    endFade.addColorStop(0.72, "rgba(255,255,255,0.98)");
+    endFade.addColorStop(0.8, "rgba(255,255,255,0.86)");
+    endFade.addColorStop(0.88, "rgba(255,255,255,0.32)");
     endFade.addColorStop(1, "rgba(255,255,255,0)");
     ctx.fillStyle = endFade;
-    ctx.fillRect(-width * 0.5, topY + verticalShift, width * 2, bottomY - topY);
+    ctx.fillRect(-width, topY + verticalShift, width * 3, bottomY - topY);
 
     ctx.restore();
 
     ctx.save();
-    ctx.strokeStyle = `rgba(255,255,255,${spec.edgeAlpha})`;
-    ctx.lineWidth = Math.max(1.3, Math.min(width, height) * 0.0044);
+    ctx.strokeStyle = `rgba(255,255,255,${Math.min(0.9, spec.edgeAlpha * 1.1)})`;
+    ctx.lineWidth = Math.max(1.6, Math.min(width, height) * 0.005);
     ctx.beginPath();
     traceEdge(leftPoints);
     ctx.stroke();
 
-    ctx.strokeStyle = `rgba(199,224,255,${spec.edgeAlpha * 0.8})`;
+    ctx.strokeStyle = `rgba(210,229,255,${Math.min(0.82, spec.edgeAlpha * 0.98)})`;
     ctx.beginPath();
     traceEdge(rightPoints);
     ctx.stroke();
 
     ctx.globalCompositeOperation = "screen";
-    ctx.strokeStyle = `rgba(255, 214, 136, ${spec.edgeAlpha * 0.15})`;
-    ctx.lineWidth = Math.max(0.8, Math.min(width, height) * 0.002);
+    ctx.strokeStyle = `rgba(255, 214, 136, ${spec.edgeAlpha * 0.18})`;
+    ctx.lineWidth = Math.max(1, Math.min(width, height) * 0.0022);
     ctx.beginPath();
     traceEdge(leftPoints.filter((_, pointIndex) => pointIndex % 2 === 0));
     ctx.stroke();
@@ -583,43 +629,50 @@
     ctx.lineCap = "round";
 
     const arcs = [
-      { y: 0.12, alpha: 0.18, width: 2.4, drift: 0.18 },
-      { y: 0.32, alpha: 0.14, width: 1.8, drift: 0.14 },
-      { y: 0.52, alpha: 0.28, width: 3.8, drift: 0.22 },
-      { y: 0.72, alpha: 0.18, width: 2.1, drift: 0.18 },
-      { y: 0.88, alpha: 0.14, width: 1.6, drift: 0.13 },
+      { y: 0.08, alpha: 0.2, width: 2.8, drift: 0.2 },
+      { y: 0.24, alpha: 0.16, width: 2.1, drift: 0.16 },
+      { y: 0.46, alpha: 0.32, width: 4.2, drift: 0.24 },
+      { y: 0.66, alpha: 0.2, width: 2.4, drift: 0.2 },
+      { y: 0.84, alpha: 0.16, width: 1.9, drift: 0.15 },
     ];
 
     arcs.forEach((arc, index) => {
       ctx.beginPath();
-      for (let i = -1; i <= 34; i += 1) {
-        const t = i / 34;
-        const x = t * width * 1.22 - width * 0.11;
+      for (let i = -4; i <= 42; i += 1) {
+        const t = i / 38;
+        const x = t * width * 1.42 - width * 0.22;
         const y =
           height * arc.y +
           Math.sin(
             t * Math.PI * (2.6 + index * 0.38) + time * (0.34 + index * 0.08),
           ) *
             height *
-            0.022 +
+            0.024 +
           Math.cos(t * Math.PI * 2.2 - state.rotation.y * 0.92 + index) *
             height *
-            0.018 +
+            0.02 +
           state.rotation.x * height * arc.drift;
 
-        if (i === -1) {
+        if (i === -4) {
           ctx.moveTo(x, y);
         } else {
           ctx.lineTo(x, y);
         }
       }
 
-      const stroke = ctx.createLinearGradient(0, 0, width, 0);
+      const stroke = ctx.createLinearGradient(
+        -width * 0.18,
+        0,
+        width * 1.16,
+        0,
+      );
       stroke.addColorStop(0, "rgba(255,255,255,0)");
-      stroke.addColorStop(0.16, `rgba(198, 219, 255, ${arc.alpha * 0.8})`);
-      stroke.addColorStop(0.42, `rgba(255,255,255,${arc.alpha * 1.9})`);
-      stroke.addColorStop(0.62, "rgba(255, 223, 171, 0.09)");
-      stroke.addColorStop(0.78, "rgba(154, 150, 255, 0.07)");
+      stroke.addColorStop(0.12, `rgba(198, 219, 255, ${arc.alpha * 0.34})`);
+      stroke.addColorStop(0.28, `rgba(255,255,255,${arc.alpha * 1.2})`);
+      stroke.addColorStop(0.5, `rgba(255,255,255,${arc.alpha * 2.1})`);
+      stroke.addColorStop(0.66, "rgba(255, 223, 171, 0.12)");
+      stroke.addColorStop(0.8, "rgba(154, 150, 255, 0.09)");
+      stroke.addColorStop(0.92, `rgba(255,255,255,${arc.alpha * 0.3})`);
       stroke.addColorStop(1, "rgba(255,255,255,0)");
       ctx.strokeStyle = stroke;
       ctx.lineWidth = arc.width;
@@ -631,34 +684,42 @@
 
   function drawSharpBand(spec, index, width, height, time) {
     const phase = time * (0.28 + index * 0.06);
-    const center =
-      spec.position + Math.sin(phase + index) * 0.026 + state.rotation.y * 0.1;
-    const left = width * (center - spec.width * 0.5);
-    const right = width * (center + spec.width * 0.5);
+    const baseCenter =
+      spec.position + Math.sin(phase + index) * 0.03 + state.rotation.y * 0.12;
+    const repetitions = [-1, 0, 1];
 
-    ctx.save();
-    ctx.globalCompositeOperation = "screen";
-    ctx.globalAlpha = spec.alpha;
-    ctx.translate(width * 0.03, 0);
-    ctx.rotate(
-      ((spec.angle + state.rotation.x * 12 + state.rotation.y * 2.6) *
-        Math.PI) /
-        180,
-    );
+    repetitions.forEach((offset) => {
+      const center = baseCenter + offset;
+      const expandedWidth = spec.width * 1.4;
+      const left = width * (center - expandedWidth * 0.5);
+      const right = width * (center + expandedWidth * 0.5);
 
-    const gradient = ctx.createLinearGradient(left, 0, right, 0);
-    gradient.addColorStop(0, spec.colors[0]);
-    gradient.addColorStop(0.3, spec.colors[1]);
-    gradient.addColorStop(0.62, spec.colors[2]);
-    gradient.addColorStop(1, spec.colors[3]);
-    ctx.fillStyle = gradient;
-    ctx.fillRect(
-      left,
-      -height * 0.28,
-      Math.max(16, right - left),
-      height * 1.7,
-    );
-    ctx.restore();
+      ctx.save();
+      ctx.globalCompositeOperation = "screen";
+      ctx.globalAlpha = spec.alpha;
+      ctx.translate(width * 0.05, 0);
+      ctx.rotate(
+        ((spec.angle + state.rotation.x * 12 + state.rotation.y * 2.6) *
+          Math.PI) /
+          180,
+      );
+
+      const gradient = ctx.createLinearGradient(left, 0, right, 0);
+      gradient.addColorStop(0, "rgba(255,255,255,0)");
+      gradient.addColorStop(0.2, spec.colors[1]);
+      gradient.addColorStop(0.38, "rgba(255,255,255,0.98)");
+      gradient.addColorStop(0.54, spec.colors[2]);
+      gradient.addColorStop(0.76, "rgba(255,255,255,0.28)");
+      gradient.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(
+        left - width * 0.08,
+        -height * 0.42,
+        Math.max(36, right - left) + width * 0.16,
+        height * 2.02,
+      );
+      ctx.restore();
+    });
   }
 
   function drawOrbHighlight(width, height, time) {
@@ -681,33 +742,35 @@
         state.rotation.x * 0.068 +
         pointerInfluenceY +
         Math.cos(time * 0.18) * 0.024);
-    const radius = Math.max(width, height) * 0.68;
+    const radius = Math.max(width, height) * 0.72;
 
     ctx.save();
     ctx.globalCompositeOperation = "screen";
 
-    const glow = ctx.createRadialGradient(x, y, radius * 0.025, x, y, radius);
-    glow.addColorStop(0, "rgba(255,255,255,0.64)");
-    glow.addColorStop(0.05, "rgba(255,255,255,0.34)");
-    glow.addColorStop(0.22, "rgba(214,233,255,0.24)");
-    glow.addColorStop(0.46, "rgba(255,222,163,0.11)");
-    glow.addColorStop(0.62, "rgba(150,149,255,0.07)");
+    const glow = ctx.createRadialGradient(x, y, radius * 0.02, x, y, radius);
+    glow.addColorStop(0, "rgba(255,255,255,0.82)");
+    glow.addColorStop(0.04, "rgba(255,255,255,0.46)");
+    glow.addColorStop(0.16, "rgba(214,233,255,0.32)");
+    glow.addColorStop(0.34, "rgba(255,255,255,0.12)");
+    glow.addColorStop(0.48, "rgba(255,222,163,0.14)");
+    glow.addColorStop(0.62, "rgba(150,149,255,0.1)");
     glow.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = glow;
     ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
 
     const rim = ctx.createLinearGradient(
-      width * 0.06,
-      height * 0.08,
-      width * 0.96,
-      height * 0.96,
+      width * -0.02,
+      height * 0.04,
+      width * 1.02,
+      height * 0.98,
     );
     rim.addColorStop(0, "rgba(255,255,255,0)");
-    rim.addColorStop(0.24, "rgba(255,255,255,0.14)");
-    rim.addColorStop(0.42, "rgba(255,255,255,0.3)");
-    rim.addColorStop(0.58, "rgba(198,225,255,0.13)");
-    rim.addColorStop(0.72, "rgba(255,223,174,0.1)");
-    rim.addColorStop(0.82, "rgba(145,149,255,0.08)");
+    rim.addColorStop(0.2, "rgba(255,255,255,0.18)");
+    rim.addColorStop(0.38, "rgba(255,255,255,0.4)");
+    rim.addColorStop(0.52, "rgba(255,255,255,0.12)");
+    rim.addColorStop(0.62, "rgba(198,225,255,0.18)");
+    rim.addColorStop(0.74, "rgba(255,223,174,0.12)");
+    rim.addColorStop(0.84, "rgba(145,149,255,0.1)");
     rim.addColorStop(1, "rgba(255,255,255,0)");
     ctx.fillStyle = rim;
     ctx.fillRect(0, 0, width, height);
