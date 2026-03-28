@@ -1,0 +1,141 @@
+:root {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
+  background:
+    radial-gradient(
+      circle at 52% 18%,
+      rgba(71, 148, 193, 0.14),
+      transparent 24%
+    ),
+    radial-gradient(
+      circle at 48% 80%,
+      rgba(18, 92, 122, 0.12),
+      transparent 28%
+    ),
+    linear-gradient(180deg, #020813 0%, #05111f 42%, #040c16 72%, #02060d 100%);
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+.neo-scene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      circle at 50% 56%,
+      rgba(53, 173, 211, 0.06),
+      transparent 32%
+    ),
+    linear-gradient(180deg, rgba(4, 12, 22, 0.96), rgba(2, 7, 14, 0.99));
+}
+
+#neo-canvas,
+.neo-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#neo-canvas {
+  display: block;
+}
+
+.neo-overlay {
+  pointer-events: none;
+}
+
+.neo-vignette,
+.neo-haze,
+.neo-grain {
+  position: absolute;
+  inset: -8%;
+}
+
+.neo-vignette {
+  background:
+    radial-gradient(
+      circle at 50% 56%,
+      transparent 30%,
+      rgba(3, 7, 13, 0.18) 58%,
+      rgba(0, 0, 0, 0.62) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(4, 10, 19, 0.18),
+      transparent 16%,
+      transparent 84%,
+      rgba(0, 0, 0, 0.3) 100%
+    );
+}
+
+.neo-haze {
+  background:
+    radial-gradient(
+      circle at 46% 44%,
+      rgba(158, 213, 232, 0.1),
+      transparent 18%
+    ),
+    radial-gradient(
+      circle at 66% 62%,
+      rgba(92, 195, 224, 0.08),
+      transparent 18%
+    ),
+    radial-gradient(
+      circle at 34% 74%,
+      rgba(149, 242, 223, 0.06),
+      transparent 20%
+    ),
+    radial-gradient(
+      circle at 58% 84%,
+      rgba(255, 255, 255, 0.04),
+      transparent 18%
+    );
+  mix-blend-mode: screen;
+  filter: blur(32px);
+  opacity: 0.76;
+}
+
+.neo-grain {
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.018) 0,
+      rgba(255, 255, 255, 0.018) 1px,
+      transparent 1px,
+      transparent 4px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.01) 0,
+      rgba(255, 255, 255, 0.01) 1px,
+      transparent 1px,
+      transparent 7px
+    );
+  mix-blend-mode: soft-light;
+  opacity: 0.1;
+}
