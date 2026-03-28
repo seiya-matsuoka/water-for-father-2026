@@ -2,7 +2,7 @@
   const canvas = document.getElementById("morfh-canvas");
   const ctx = canvas.getContext("2d", { alpha: true });
 
-  const dprMax = 1.7;
+  const dprMax = 1.6;
   const baseCanvas = document.createElement("canvas");
   const baseCtx = baseCanvas.getContext("2d", { alpha: true });
   const grainCanvas = document.createElement("canvas");
@@ -12,7 +12,7 @@
   let height = 0;
   let dpr = 1;
 
-  const pointer = { x: 0, y: 0, active: false };
+  const pointer = { active: false };
   const motion = {
     x: 0,
     y: 0,
@@ -24,25 +24,29 @@
 
   const state = {
     tiles: [],
-    tintBlobs: [],
+    grainDots: 0,
     tAnchor: null,
-    lastTime: performance.now(),
   };
 
   const palette = {
-    paper: "#eef3f2",
-    white: "rgba(255,255,255,0.72)",
-    ice: "rgba(219, 243, 248, 0.54)",
-    cyan: "rgba(193, 237, 248, 0.52)",
-    lavender: "rgba(198, 191, 236, 0.34)",
-    mint: "rgba(214, 236, 228, 0.42)",
-    yellow: "rgba(239, 236, 198, 0.22)",
-    ink: "rgba(76, 92, 103, 0.16)",
-    grain: "rgba(103, 118, 131, 0.065)",
+    bg0: "#f2f6f4",
+    bg1: "#edf3f1",
+    white: "rgba(255,255,255,0.84)",
+    softWhite: "rgba(250,252,252,0.92)",
+    ice: "rgba(214, 239, 247, 0.56)",
+    cyan: "rgba(193, 233, 245, 0.54)",
+    lavender: "rgba(197, 193, 234, 0.42)",
+    mint: "rgba(216, 237, 229, 0.46)",
+    yellow: "rgba(243, 239, 202, 0.34)",
+    printGrey: "rgba(114, 127, 139, 0.10)",
+    grainDark: "rgba(98, 110, 122, 0.14)",
+    grainLight: "rgba(255,255,255,0.22)",
+    tBlue: "rgba(190, 221, 245, 0.30)",
+    tLavender: "rgba(200, 189, 235, 0.22)",
   };
 
-  function clamp(value, min, max) {
-    return Math.max(min, Math.min(max, value));
+  function clamp(v, min, max) {
+    return Math.max(min, Math.min(max, v));
   }
 
   function lerp(a, b, t) {
@@ -64,36 +68,22 @@
     targetCtx.scale(dpr, dpr);
   }
 
+  function rgbaWithAlpha(color, alpha) {
+    return color.replace(
+      /rgba\(([^)]+),\s*[0-9.]+\)/,
+      (_, rgb) => `rgba(${rgb}, ${alpha})`,
+    );
+  }
+
   function buildTiles() {
     state.tiles = [];
-    state.tintBlobs = [];
 
-    const cols = clamp(Math.round(width / 132), 6, 10);
-    const rows = clamp(Math.round(height / 132), 8, 14);
-
-    const colEdges = [0];
-    let cursorX = 0;
-    for (let i = 0; i < cols; i += 1) {
-      const remaining = width - cursorX;
-      const slotsLeft = cols - i;
-      let size = width / cols + rand(-26, 26);
-      size = clamp(size, 72, remaining - 72 * (slotsLeft - 1));
-      cursorX += size;
-      colEdges.push(i === cols - 1 ? width : cursorX);
-    }
-
-    const rowEdges = [0];
-    let cursorY = 0;
-    for (let i = 0; i < rows; i += 1) {
-      const remaining = height - cursorY;
-      const slotsLeft = rows - i;
-      let size = height / rows + rand(-22, 22);
-      size = clamp(size, 66, remaining - 66 * (slotsLeft - 1));
-      cursorY += size;
-      rowEdges.push(i === rows - 1 ? height : cursorY);
-    }
-
+    const cols = clamp(Math.round(width / 122), 5, 8);
+    const rows = clamp(Math.round(height / 118), 8, 13);
+    const baseW = width / cols;
+    const baseH = height / rows;
     const colors = [
+      palette.softWhite,
       palette.white,
       palette.white,
       palette.ice,
@@ -105,134 +95,199 @@
 
     for (let row = 0; row < rows; row += 1) {
       for (let col = 0; col < cols; col += 1) {
-        const x1 = colEdges[col];
-        const y1 = rowEdges[row];
-        const x2 = colEdges[col + 1];
-        const y2 = rowEdges[row + 1];
-
-        const padX = rand(-10, 8);
-        const padY = rand(-8, 9);
-        const w = Math.max(48, x2 - x1 + rand(-12, 10));
-        const h = Math.max(48, y2 - y1 + rand(-10, 10));
+        const wFactor = choose([1, 1, 1, 1.18, 1.25, 1.35]);
+        const hFactor = choose([0.94, 1, 1.04, 1.1]);
+        const x = col * baseW + rand(-10, 8);
+        const y = row * baseH + rand(-9, 8);
+        const w = baseW * wFactor + rand(-10, 12);
+        const h = baseH * hFactor + rand(-10, 10);
 
         const tile = {
-          x: x1 + padX,
-          y: y1 + padY,
+          x,
+          y,
           w,
           h,
-          color: choose(colors),
-          opacity: rand(0.44, 0.76),
-          blur: rand(0, 24),
-          wobbleX: rand(-8, 8),
-          wobbleY: rand(-8, 8),
+          baseColor: choose(colors),
+          opacity: rand(0.78, 0.98),
+          blur: rand(6, 16),
+          edgeAlpha: rand(0.06, 0.16),
+          tintA: choose([
+            palette.ice,
+            palette.cyan,
+            palette.lavender,
+            palette.mint,
+            palette.yellow,
+          ]),
+          tintB: choose([
+            palette.softWhite,
+            palette.ice,
+            palette.lavender,
+            palette.mint,
+          ]),
+          tintAlphaA: rand(0.12, 0.26),
+          tintAlphaB: rand(0.08, 0.18),
+          tintDir: Math.random() < 0.5 ? 0 : 1,
+          wobbleX: rand(-5, 5),
+          wobbleY: rand(-5, 5),
           phase: rand(0, Math.PI * 2),
         };
-        state.tiles.push(tile);
 
-        if (Math.random() > 0.42) {
-          state.tintBlobs.push({
-            x: tile.x + rand(tile.w * 0.12, tile.w * 0.74),
-            y: tile.y + rand(tile.h * 0.16, tile.h * 0.8),
-            rx: rand(tile.w * 0.18, tile.w * 0.42),
-            ry: rand(tile.h * 0.12, tile.h * 0.34),
-            color: choose([
-              palette.cyan,
-              palette.lavender,
-              palette.mint,
-              palette.yellow,
-            ]),
-            alpha: rand(0.08, 0.22),
-            phase: rand(0, Math.PI * 2),
-            drift: rand(3, 12),
-          });
-        }
+        state.tiles.push(tile);
       }
     }
 
+    // add a few stacked panel fragments to better mimic the cover
+    const fragmentCount = clamp(Math.round((width * height) / 110000), 5, 9);
+    for (let i = 0; i < fragmentCount; i += 1) {
+      state.tiles.push({
+        x: rand(width * 0.06, width * 0.78),
+        y: rand(height * 0.04, height * 0.9),
+        w: rand(baseW * 0.7, baseW * 1.4),
+        h: rand(baseH * 0.55, baseH * 1.15),
+        baseColor: choose([
+          palette.softWhite,
+          palette.ice,
+          palette.lavender,
+          palette.mint,
+        ]),
+        opacity: rand(0.65, 0.84),
+        blur: rand(8, 18),
+        edgeAlpha: rand(0.04, 0.1),
+        tintA: choose([
+          palette.cyan,
+          palette.lavender,
+          palette.mint,
+          palette.yellow,
+        ]),
+        tintB: choose([palette.softWhite, palette.ice, palette.lavender]),
+        tintAlphaA: rand(0.12, 0.24),
+        tintAlphaB: rand(0.06, 0.16),
+        tintDir: Math.random() < 0.5 ? 0 : 1,
+        wobbleX: rand(-4, 4),
+        wobbleY: rand(-4, 4),
+        phase: rand(0, Math.PI * 2),
+      });
+    }
+
     const tTile =
-      state.tiles[Math.floor(state.tiles.length * 0.58)] ||
+      state.tiles[Math.floor(state.tiles.length * 0.68)] ||
       state.tiles[state.tiles.length - 1];
-    state.tAnchor = tTile
-      ? {
-          x: tTile.x + tTile.w * 0.58,
-          y: tTile.y + tTile.h * 0.6,
-          size: Math.max(18, Math.min(tTile.w, tTile.h) * 0.22),
-        }
-      : null;
+    if (tTile) {
+      state.tAnchor = {
+        x: tTile.x + tTile.w * 0.54,
+        y: tTile.y + tTile.h * 0.56,
+        size: clamp(Math.min(tTile.w, tTile.h) * 0.22, 14, 24),
+      };
+    }
   }
 
   function paintBase() {
     baseCtx.clearRect(0, 0, width, height);
 
     const bg = baseCtx.createLinearGradient(0, 0, width, height);
-    bg.addColorStop(0, "#f1f5f4");
-    bg.addColorStop(0.52, "#edf3f2");
-    bg.addColorStop(1, "#e8efee");
+    bg.addColorStop(0, palette.bg0);
+    bg.addColorStop(0.56, "#eef4f2");
+    bg.addColorStop(1, palette.bg1);
     baseCtx.fillStyle = bg;
     baseCtx.fillRect(0, 0, width, height);
 
+    const verticalMist = baseCtx.createLinearGradient(
+      width * 0.45,
+      0,
+      width * 0.55,
+      0,
+    );
+    verticalMist.addColorStop(0, "rgba(255,255,255,0)");
+    verticalMist.addColorStop(0.5, "rgba(255,255,255,0.22)");
+    verticalMist.addColorStop(1, "rgba(255,255,255,0)");
+    baseCtx.fillStyle = verticalMist;
+    baseCtx.fillRect(0, 0, width, height);
+
     state.tiles.forEach((tile) => {
-      const { x, y, w, h, color, opacity, blur } = tile;
+      const {
+        x,
+        y,
+        w,
+        h,
+        baseColor,
+        opacity,
+        blur,
+        edgeAlpha,
+        tintA,
+        tintB,
+        tintAlphaA,
+        tintAlphaB,
+        tintDir,
+      } = tile;
+
       baseCtx.save();
       baseCtx.globalAlpha = opacity;
       baseCtx.filter = `blur(${blur}px)`;
-      baseCtx.fillStyle = color;
+      baseCtx.fillStyle = baseColor;
       baseCtx.fillRect(x, y, w, h);
       baseCtx.restore();
 
-      const softEdge = baseCtx.createLinearGradient(x, y, x + w, y + h);
-      softEdge.addColorStop(0, "rgba(255,255,255,0.22)");
-      softEdge.addColorStop(0.5, "rgba(255,255,255,0)");
-      softEdge.addColorStop(1, "rgba(186, 196, 204, 0.10)");
-      baseCtx.fillStyle = softEdge;
-      baseCtx.fillRect(x, y, w, h);
-    });
-
-    state.tintBlobs.forEach((blob) => {
       baseCtx.save();
-      baseCtx.translate(blob.x, blob.y);
-      baseCtx.scale(blob.rx, blob.ry);
-      baseCtx.fillStyle = blob.color.replace(
-        /rgba\(([^)]+),\s*([0-9.]+)\)/,
-        (m, rgb) => `rgba(${rgb}, ${blob.alpha})`,
+      const grad =
+        tintDir === 0
+          ? baseCtx.createLinearGradient(x, y, x + w, y)
+          : baseCtx.createLinearGradient(x, y, x, y + h);
+      grad.addColorStop(0, rgbaWithAlpha(tintA, tintAlphaA));
+      grad.addColorStop(rand(0.36, 0.58), "rgba(255,255,255,0)");
+      grad.addColorStop(1, rgbaWithAlpha(tintB, tintAlphaB));
+      baseCtx.fillStyle = grad;
+      baseCtx.fillRect(x, y, w, h);
+      baseCtx.restore();
+
+      baseCtx.save();
+      baseCtx.globalAlpha = 1;
+      baseCtx.strokeStyle = `rgba(201, 210, 214, ${edgeAlpha})`;
+      baseCtx.lineWidth = 1;
+      baseCtx.strokeRect(
+        Math.round(x) + 0.5,
+        Math.round(y) + 0.5,
+        Math.round(w),
+        Math.round(h),
       );
-      baseCtx.beginPath();
-      baseCtx.ellipse(0, 0, 1, 1, rand(-0.3, 0.3), 0, Math.PI * 2);
-      baseCtx.fill();
       baseCtx.restore();
     });
 
-    // Soft print seams
+    // print seams / scan edges
     baseCtx.save();
-    baseCtx.strokeStyle = "rgba(190, 202, 207, 0.15)";
-    baseCtx.lineWidth = 1;
-    for (let i = 0; i < state.tiles.length; i += 5) {
-      const tile = state.tiles[i];
-      baseCtx.strokeRect(tile.x + 0.5, tile.y + 0.5, tile.w, tile.h);
+    baseCtx.globalAlpha = 0.11;
+    for (let i = 0; i < 8; i += 1) {
+      const x = width * (i / 7) + rand(-8, 8);
+      const grad = baseCtx.createLinearGradient(x - 10, 0, x + 10, 0);
+      grad.addColorStop(0, "rgba(255,255,255,0)");
+      grad.addColorStop(0.5, "rgba(255,255,255,0.85)");
+      grad.addColorStop(1, "rgba(255,255,255,0)");
+      baseCtx.fillStyle = grad;
+      baseCtx.fillRect(x - 10, 0, 20, height);
     }
     baseCtx.restore();
   }
 
   function paintGrain() {
     grainCtx.clearRect(0, 0, width, height);
-    const count = Math.round((width * height) / 920);
-    for (let i = 0; i < count; i += 1) {
+
+    state.grainDots = Math.round((width * height) / 430);
+    for (let i = 0; i < state.grainDots; i += 1) {
       const x = Math.random() * width;
       const y = Math.random() * height;
-      const s = Math.random() < 0.84 ? 1 : 1.8;
+      const s = Math.random() < 0.84 ? 1 : 1.6;
       grainCtx.fillStyle =
-        Math.random() < 0.86 ? palette.grain : "rgba(232, 239, 240, 0.28)";
+        Math.random() < 0.78 ? palette.grainDark : palette.grainLight;
       grainCtx.fillRect(x, y, s, s);
     }
 
     grainCtx.save();
-    grainCtx.globalAlpha = 0.06;
-    for (let i = 0; i < 9; i += 1) {
+    grainCtx.globalAlpha = 0.09;
+    for (let i = 0; i < 26; i += 1) {
       const x = rand(0, width);
-      const w = rand(14, 36);
+      const w = rand(4, 11);
       const grad = grainCtx.createLinearGradient(x, 0, x + w, 0);
       grad.addColorStop(0, "rgba(255,255,255,0)");
-      grad.addColorStop(0.5, "rgba(255,255,255,0.8)");
+      grad.addColorStop(0.5, "rgba(255,255,255,0.95)");
       grad.addColorStop(1, "rgba(255,255,255,0)");
       grainCtx.fillStyle = grad;
       grainCtx.fillRect(x, 0, w, height);
@@ -268,124 +323,105 @@
     paintGrain();
   }
 
-  function updateMotion() {
-    motion.vx += (motion.targetX - motion.x) * 0.038;
-    motion.vy += (motion.targetY - motion.y) * 0.038;
+  function updateMotion(time) {
+    motion.vx += (motion.targetX - motion.x) * 0.04;
+    motion.vy += (motion.targetY - motion.y) * 0.04;
     motion.vx *= 0.84;
     motion.vy *= 0.84;
     motion.x += motion.vx;
     motion.y += motion.vy;
 
     if (!pointer.active) {
-      const t = performance.now() * 0.00022;
-      motion.targetX = Math.sin(t * 1.1) * 8;
-      motion.targetY = Math.cos(t * 0.9) * 6;
+      motion.targetX = Math.sin(time * 0.00018) * 6;
+      motion.targetY = Math.cos(time * 0.00015) * 5;
     }
   }
 
-  function drawSoftT(time) {
+  function drawT(time) {
     if (!state.tAnchor) return;
 
-    const pulse = 0.5 + 0.5 * Math.sin(time * 0.00065 + motion.x * 0.08);
-    const dragAmount = Math.min(1, Math.hypot(motion.x, motion.y) / 18);
-    const anchorX = state.tAnchor.x + motion.x * 0.22;
-    const anchorY = state.tAnchor.y + motion.y * 0.18;
-    const fontSize = state.tAnchor.size;
+    const driftX = motion.x * 0.14;
+    const driftY = motion.y * 0.12;
+    const pulse = 0.5 + 0.5 * Math.sin(time * 0.00045);
+    const alphaBase = 0.16 + pulse * 0.04;
 
     ctx.save();
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.font = `600 ${fontSize}px "Helvetica Neue", "Arial Narrow", Arial, sans-serif`;
+    ctx.font = `600 ${state.tAnchor.size}px "Helvetica Neue", "Arial Narrow", Arial, sans-serif`;
 
-    ctx.fillStyle = `rgba(255,255,255,${0.08 + dragAmount * 0.03})`;
-    ctx.fillText("t", anchorX, anchorY);
+    ctx.fillStyle = `rgba(255,255,255,${alphaBase})`;
+    ctx.fillText("t", state.tAnchor.x + driftX, state.tAnchor.y + driftY);
 
-    ctx.fillStyle = `rgba(198, 223, 242, ${0.18 + pulse * 0.08})`;
+    ctx.fillStyle = `rgba(195, 223, 245, ${0.18 + pulse * 0.05})`;
     ctx.fillText(
       "t",
-      anchorX + 1.6 + motion.x * 0.06,
-      anchorY - 0.8 + motion.y * 0.05,
+      state.tAnchor.x + driftX + 1.4,
+      state.tAnchor.y + driftY - 0.8,
     );
 
-    ctx.fillStyle = `rgba(201, 190, 236, ${0.12 + dragAmount * 0.08})`;
+    ctx.fillStyle = `rgba(201, 190, 236, ${0.13 + pulse * 0.04})`;
     ctx.fillText(
       "t",
-      anchorX - 1.2 - motion.x * 0.04,
-      anchorY + 1.2 - motion.y * 0.04,
+      state.tAnchor.x + driftX - 1.2,
+      state.tAnchor.y + driftY + 1.1,
     );
     ctx.restore();
   }
 
   function render(time) {
-    updateMotion();
-
+    updateMotion(time);
     ctx.clearRect(0, 0, width, height);
 
-    const baseOffsetX = motion.x * 0.16;
-    const baseOffsetY = motion.y * 0.12;
+    const baseOffsetX = motion.x * 0.12;
+    const baseOffsetY = motion.y * 0.1;
     ctx.drawImage(baseCanvas, baseOffsetX, baseOffsetY, width, height);
 
-    // Breathing tint and print drift
+    // subtle print-shift overlay
     ctx.save();
     ctx.globalCompositeOperation = "screen";
-    ctx.globalAlpha = 0.14;
-    const hueShift = 0.5 + 0.5 * Math.sin(time * 0.00035);
-    const grad = ctx.createLinearGradient(
-      width * (0.2 + motion.x * 0.0008),
-      height * 0.18,
-      width * 0.78,
-      height * (0.84 + motion.y * 0.0008),
+    ctx.globalAlpha = 0.19;
+    const shift = 0.5 + 0.5 * Math.sin(time * 0.00036);
+    const glow = ctx.createLinearGradient(
+      width * 0.18,
+      0,
+      width * 0.82,
+      height,
     );
-    grad.addColorStop(0, `rgba(232,244,247,${0.22 + hueShift * 0.06})`);
-    grad.addColorStop(0.4, `rgba(201,236,245,${0.1 + hueShift * 0.05})`);
-    grad.addColorStop(
-      0.72,
-      `rgba(203,197,235,${0.08 + (1 - hueShift) * 0.06})`,
-    );
-    grad.addColorStop(1, "rgba(255,255,255,0.18)");
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, width, height);
+    glow.addColorStop(0, `rgba(215,239,246,${0.18 + shift * 0.06})`);
+    glow.addColorStop(0.38, `rgba(255,255,255,${0.11 + shift * 0.04})`);
+    glow.addColorStop(0.7, `rgba(202,194,234,${0.09 + (1 - shift) * 0.05})`);
+    glow.addColorStop(1, "rgba(255,255,255,0.16)");
+    ctx.fillStyle = glow;
+    ctx.fillRect(motion.x * 0.18, motion.y * 0.12, width, height);
     ctx.restore();
 
-    // Grain / print noise with tiny drift
+    // grain / print texture
     ctx.save();
-    ctx.globalAlpha = 0.9;
-    ctx.drawImage(grainCanvas, motion.x * 0.12, motion.y * 0.12, width, height);
+    ctx.globalAlpha = 0.96;
+    ctx.drawImage(grainCanvas, motion.x * 0.08, motion.y * 0.08, width, height);
     ctx.restore();
 
-    // Very soft overlay bands like paper pressure
-    ctx.save();
-    ctx.globalAlpha = 0.22;
-    for (let i = 0; i < 4; i += 1) {
-      const x =
-        width * (0.16 + i * 0.22) +
-        Math.sin(time * 0.00028 + i) * 6 +
-        motion.x * 0.12;
-      const band = ctx.createLinearGradient(x - 22, 0, x + 22, 0);
-      band.addColorStop(0, "rgba(255,255,255,0)");
-      band.addColorStop(0.5, "rgba(255,255,255,0.30)");
-      band.addColorStop(1, "rgba(255,255,255,0)");
-      ctx.fillStyle = band;
-      ctx.fillRect(x - 22, 0, 44, height);
-    }
-    ctx.restore();
-
-    drawSoftT(time);
+    drawT(time);
     requestAnimationFrame(render);
   }
 
   function handlePointer(x, y, active = true) {
-    pointer.x = x;
-    pointer.y = y;
     pointer.active = active;
-
     const nx = (x / width - 0.5) * 2;
     const ny = (y / height - 0.5) * 2;
-    motion.targetX = clamp(nx * 18, -18, 18);
-    motion.targetY = clamp(ny * 15, -15, 15);
+    motion.targetX = clamp(nx * 10, -10, 10);
+    motion.targetY = clamp(ny * 8, -8, 8);
+  }
+
+  function preventTouchDefault(event) {
+    event.preventDefault();
   }
 
   window.addEventListener("resize", resize);
+  document.addEventListener("touchmove", preventTouchDefault, {
+    passive: false,
+  });
 
   canvas.addEventListener("pointerdown", (event) => {
     canvas.setPointerCapture(event.pointerId);
