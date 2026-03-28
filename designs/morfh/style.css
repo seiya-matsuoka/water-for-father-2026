@@ -1,7 +1,7 @@
 :root {
   color-scheme: light;
-  --paper: #edf4f1;
-  --paper-edge: rgba(255, 255, 255, 0.6);
+  --paper: #eef4f3;
+  --paper-edge: rgba(255, 255, 255, 0.68);
 }
 
 * {
@@ -20,7 +20,7 @@ body {
 }
 
 body {
-  font-family: "Helvetica Neue", "Arial Narrow", Arial, sans-serif;
+  font-family: "Helvetica Neue", Arial, sans-serif;
   touch-action: none;
 }
 
@@ -32,16 +32,16 @@ body {
   touch-action: none;
   background:
     radial-gradient(
-      circle at 16% 12%,
-      rgba(255, 255, 255, 0.72),
-      rgba(255, 255, 255, 0) 34%
+      circle at 18% 12%,
+      rgba(255, 255, 255, 0.78),
+      rgba(255, 255, 255, 0) 30%
     ),
     radial-gradient(
-      circle at 78% 24%,
-      rgba(230, 239, 244, 0.32),
-      rgba(236, 244, 247, 0) 28%
+      circle at 82% 16%,
+      rgba(226, 236, 245, 0.32),
+      rgba(241, 247, 245, 0) 24%
     ),
-    linear-gradient(180deg, #eef5f2 0%, #e8efed 100%);
+    linear-gradient(180deg, #eef4f4 0%, #ecf3f2 100%);
 }
 
 #morfh-canvas {
@@ -59,15 +59,15 @@ body {
     radial-gradient(
       circle at 50% 44%,
       rgba(255, 255, 255, 0),
-      rgba(244, 248, 247, 0.08) 56%,
-      rgba(224, 232, 231, 0.16) 100%
+      rgba(244, 248, 247, 0.04) 58%,
+      rgba(225, 233, 232, 0.11) 100%
     ),
     linear-gradient(
       90deg,
-      rgba(255, 255, 255, 0.08),
+      rgba(255, 255, 255, 0.05),
       rgba(255, 255, 255, 0) 16%,
       rgba(255, 255, 255, 0) 84%,
-      rgba(255, 255, 255, 0.08)
+      rgba(255, 255, 255, 0.05)
     );
   mix-blend-mode: screen;
 }
