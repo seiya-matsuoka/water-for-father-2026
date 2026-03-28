@@ -407,17 +407,17 @@
 
   function overlayStops(phase, scale = 1) {
     const s1 = 0.5 + 0.5 * Math.sin(phase);
-    const s2 = 0.5 + 0.5 * Math.sin(phase + 1.8);
-    const s3 = 0.5 + 0.5 * Math.sin(phase + 3.7);
+    const s2 = 0.5 + 0.5 * Math.sin(phase + 1.55);
+    const s3 = 0.5 + 0.5 * Math.sin(phase + 3.15);
 
-    const whiteAlpha = (0.34 + s1 * 0.26) * scale;
-    const blueAlpha = (0.07 + s2 * 0.14) * scale;
-    const mintAlpha = (0.035 + s3 * 0.09) * scale;
+    const whiteAlpha = (0.42 + s1 * 0.28) * scale;
+    const blueAlpha = (0.11 + s2 * 0.18) * scale;
+    const mintAlpha = (0.06 + s3 * 0.13) * scale;
 
     return [
-      `rgba(${Math.round(250 + s1 * 4)}, ${Math.round(252 + s1 * 3)}, 255, ${whiteAlpha.toFixed(3)})`,
-      `rgba(${Math.round(220 + s2 * 18)}, ${Math.round(240 + s2 * 12)}, ${Math.round(255 - s3 * 2)}, ${blueAlpha.toFixed(3)})`,
-      `rgba(${Math.round(223 + s3 * 8)}, ${Math.round(249 + s3 * 6)}, ${Math.round(236 + s3 * 8)}, ${mintAlpha.toFixed(3)})`,
+      `rgba(${Math.round(251 + s1 * 4)}, ${Math.round(253 + s1 * 2)}, 255, ${whiteAlpha.toFixed(3)})`,
+      `rgba(${Math.round(212 + s2 * 22)}, ${Math.round(238 + s2 * 14)}, ${Math.round(255 - s3 * 2)}, ${blueAlpha.toFixed(3)})`,
+      `rgba(${Math.round(214 + s3 * 12)}, ${Math.round(247 + s3 * 8)}, ${Math.round(230 + s3 * 14)}, ${mintAlpha.toFixed(3)})`,
     ];
   }
 
@@ -481,25 +481,25 @@
   }
 
   function drawOverlayVeils() {
-    const overlayX = state.currentX * 0.58;
-    const overlayY = state.currentY * 0.44;
-    const phase = state.time * 1.22;
+    const overlayX = state.currentX * 0.66;
+    const overlayY = state.currentY * 0.5;
+    const phase = state.time * 1.38;
 
     ctx.save();
     ctx.globalCompositeOperation = "screen";
 
     for (let i = 0; i < 4; i += 1) {
-      const px = state.width * (0.12 + i * 0.18) + overlayX * (0.9 + i * 0.16);
+      const px = state.width * (0.12 + i * 0.18) + overlayX * (0.94 + i * 0.18);
       const wave1 =
-        Math.sin(state.time * (0.46 + i * 0.08) + i * 0.8) *
+        Math.sin(state.time * (0.5 + i * 0.08) + i * 0.8) *
         state.width *
-        (0.038 + i * 0.006);
+        (0.04 + i * 0.007);
       const wave2 =
-        Math.cos(state.time * (0.38 + i * 0.06) + i * 1.15) *
+        Math.cos(state.time * (0.4 + i * 0.06) + i * 1.15) *
         state.width *
-        (0.03 + i * 0.005);
-      const ribbonWidth = state.width * (0.22 + i * 0.045);
-      const stops = overlayStops(phase + i * 0.68, 1.14 - i * 0.09);
+        (0.032 + i * 0.006);
+      const ribbonWidth = state.width * (0.24 + i * 0.05);
+      const stops = overlayStops(phase + i * 0.82, 1.2 - i * 0.08);
       const grad = ctx.createLinearGradient(
         px - ribbonWidth,
         0,
@@ -507,9 +507,9 @@
         state.height,
       );
       grad.addColorStop(0, "rgba(255,255,255,0)");
-      grad.addColorStop(0.16, stops[0]);
-      grad.addColorStop(0.46, stops[1]);
-      grad.addColorStop(0.75, stops[2]);
+      grad.addColorStop(0.14, stops[0]);
+      grad.addColorStop(0.42, stops[1]);
+      grad.addColorStop(0.72, stops[2]);
       grad.addColorStop(1, "rgba(255,255,255,0)");
 
       ctx.fillStyle = grad;
@@ -535,8 +535,8 @@
       ctx.closePath();
       ctx.fill();
 
-      ctx.strokeStyle = `rgba(246, 252, 255, ${(0.012 - i * 0.0015).toFixed(3)})`;
-      ctx.lineWidth = Math.max(1, state.width * 0.00105);
+      ctx.strokeStyle = `rgba(246, 252, 255, ${(0.0055 - i * 0.0007).toFixed(4)})`;
+      ctx.lineWidth = Math.max(1, state.width * 0.0009);
       ctx.beginPath();
       ctx.moveTo(px - ribbonWidth * 0.04, -state.height * 0.08);
       ctx.bezierCurveTo(
@@ -550,18 +550,18 @@
       ctx.stroke();
     }
 
-    for (let i = 0; i < 10; i += 1) {
+    for (let i = 0; i < 12; i += 1) {
       const rx =
-        state.width * (0.08 + i * 0.074) + overlayX * (0.96 + (i % 3) * 0.18);
+        state.width * (0.06 + i * 0.07) + overlayX * (1.02 + (i % 3) * 0.2);
       const ry =
-        state.height * (0.12 + (i % 6) * 0.12) +
-        overlayY * (0.82 + (i % 4) * 0.12);
-      const r = Math.max(state.width, state.height) * (0.085 + (i % 4) * 0.022);
-      const stops = overlayStops(phase + i * 0.42, 1.0);
+        state.height * (0.1 + (i % 6) * 0.12) +
+        overlayY * (0.88 + (i % 4) * 0.14);
+      const r = Math.max(state.width, state.height) * (0.09 + (i % 4) * 0.022);
+      const stops = overlayStops(phase + i * 0.48, 1.05);
       const radial = ctx.createRadialGradient(rx, ry, 0, rx, ry, r);
       radial.addColorStop(0, stops[0]);
-      radial.addColorStop(0.34, stops[1]);
-      radial.addColorStop(0.7, stops[2]);
+      radial.addColorStop(0.3, stops[1]);
+      radial.addColorStop(0.62, stops[2]);
       radial.addColorStop(1, "rgba(255,255,255,0)");
       ctx.fillStyle = radial;
       ctx.fillRect(rx - r, ry - r, r * 2, r * 2);
@@ -610,14 +610,14 @@
     ctx.globalCompositeOperation = "screen";
 
     const topBand = ctx.createLinearGradient(0, 0, 0, state.height * 0.24);
-    topBand.addColorStop(0, "rgba(238, 246, 252, 0.07)");
-    topBand.addColorStop(1, "rgba(218, 236, 244, 0)");
+    topBand.addColorStop(0, "rgba(244, 250, 255, 0.1)");
+    topBand.addColorStop(1, "rgba(220, 239, 248, 0)");
     ctx.fillStyle = topBand;
     ctx.fillRect(0, 0, state.width, state.height * 0.24);
 
     const sideBand = ctx.createLinearGradient(0, 0, state.width * 0.2, 0);
-    sideBand.addColorStop(0, "rgba(206, 238, 248, 0.05)");
-    sideBand.addColorStop(1, "rgba(160, 220, 236, 0)");
+    sideBand.addColorStop(0, "rgba(216, 244, 252, 0.07)");
+    sideBand.addColorStop(1, "rgba(164, 224, 238, 0)");
     ctx.fillStyle = sideBand;
     ctx.fillRect(0, 0, state.width * 0.2, state.height);
     ctx.fillRect(
