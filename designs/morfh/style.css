@@ -1,7 +1,7 @@
 :root {
   color-scheme: light;
-  --paper: #e7f3f8;
-  --paper-edge: rgba(255, 255, 255, 0.68);
+  --paper: #e4f3f8;
+  --paper-edge: rgba(255, 255, 255, 0.7);
 }
 
 * {
@@ -33,12 +33,12 @@ body {
   background:
     radial-gradient(
       circle at 18% 12%,
-      rgba(255, 255, 255, 0.74),
+      rgba(255, 255, 255, 0.76),
       rgba(255, 255, 255, 0) 30%
     ),
     radial-gradient(
       circle at 82% 16%,
-      rgba(198, 230, 246, 0.3),
+      rgba(209, 233, 245, 0.28),
       rgba(241, 247, 245, 0) 24%
     ),
     linear-gradient(180deg, #e4f3f8 0%, #edf8fb 100%);
@@ -60,14 +60,14 @@ body {
       circle at 50% 44%,
       rgba(255, 255, 255, 0),
       rgba(244, 248, 247, 0.03) 58%,
-      rgba(225, 233, 232, 0.09) 100%
+      rgba(225, 233, 232, 0.08) 100%
     ),
     linear-gradient(
       90deg,
-      rgba(255, 255, 255, 0.05),
+      rgba(255, 255, 255, 0.04),
       rgba(255, 255, 255, 0) 16%,
       rgba(255, 255, 255, 0) 84%,
-      rgba(255, 255, 255, 0.05)
+      rgba(255, 255, 255, 0.04)
     );
   mix-blend-mode: screen;
 }

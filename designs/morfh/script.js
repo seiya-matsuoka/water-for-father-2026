@@ -28,64 +28,78 @@
   };
 
   const palette = {
-    bg0: "#e5f2f7",
-    bg1: "#edf8fb",
-    bg2: "#e9f5f6",
-    paperWhite: "#f6fbfd",
+    bg0: "#dff1fb",
+    bg1: "#ebf7fb",
+    bg2: "#e4f3f7",
+    paperWhite: "#f8fcfd",
     whiteTint: "rgba(252, 254, 255, 0.98)",
-    ice: "rgba(213, 244, 255, 0.98)",
-    sky: "rgba(186, 232, 255, 0.96)",
-    cyan: "rgba(152, 221, 253, 0.95)",
-    aqua: "rgba(124, 210, 249, 0.95)",
-    lavender: "rgba(211, 200, 252, 0.95)",
-    violet: "rgba(171, 151, 239, 0.92)",
-    mint: "rgba(216, 239, 227, 0.92)",
-    yellow: "rgba(245, 239, 187, 0.90)",
-    seam: "rgba(226, 235, 238, 0.96)",
-    seamShadow: "rgba(164, 178, 188, 0.18)",
-    grainDark: "rgba(97, 110, 120, 0.26)",
-    grainLight: "rgba(255,255,255,0.24)",
-    tBlue: "rgba(160, 216, 248, 0.66)",
-    tLavender: "rgba(197, 188, 243, 0.34)",
+    ice: "rgba(217, 244, 255, 0.97)",
+    sky: "rgba(183, 228, 251, 0.96)",
+    cyan: "rgba(135, 214, 250, 0.95)",
+    aqua: "rgba(108, 204, 246, 0.94)",
+    lavender: "rgba(209, 193, 252, 0.95)",
+    violet: "rgba(168, 147, 241, 0.92)",
+    mint: "rgba(203, 235, 223, 0.92)",
+    mintDeep: "rgba(166, 224, 206, 0.90)",
+    yellow: "rgba(241, 233, 165, 0.90)",
+    warmWhite: "rgba(255, 250, 235, 0.95)",
+    seam: "rgba(229, 238, 242, 0.94)",
+    seamShadow: "rgba(162, 176, 185, 0.18)",
+    grainDark: "rgba(98, 111, 120, 0.25)",
+    grainLight: "rgba(255,255,255,0.28)",
   };
 
   const tileFamilies = [
     {
-      base: "rgba(225,244,252,0.99)",
-      ramp: ["rgba(251,254,255,0.98)", palette.sky, palette.aqua],
-      accent: ["rgba(255,255,255,0.94)", palette.lavender],
+      base: "rgba(220,242,252,0.985)",
+      ramp: [palette.whiteTint, palette.sky, palette.cyan],
+      accents: [
+        palette.lavender,
+        palette.violet,
+        palette.whiteTint,
+        palette.yellow,
+      ],
     },
     {
-      base: "rgba(229,246,253,0.99)",
-      ramp: ["rgba(252,254,255,0.98)", palette.ice, palette.cyan],
-      accent: ["rgba(255,255,255,0.94)", palette.violet],
+      base: "rgba(224,244,252,0.985)",
+      ramp: [palette.paperWhite, palette.ice, palette.aqua],
+      accents: [
+        palette.violet,
+        palette.lavender,
+        palette.whiteTint,
+        palette.mint,
+      ],
     },
     {
-      base: "rgba(232,246,251,0.99)",
-      ramp: ["rgba(252,254,255,0.98)", palette.cyan, palette.sky],
-      accent: ["rgba(255,255,255,0.94)", palette.mint],
+      base: "rgba(226,244,250,0.985)",
+      ramp: [palette.whiteTint, palette.cyan, palette.sky],
+      accents: [
+        palette.mint,
+        palette.mintDeep,
+        palette.lavender,
+        palette.warmWhite,
+      ],
     },
     {
-      base: "rgba(230,244,252,0.99)",
-      ramp: ["rgba(251,254,255,0.98)", palette.sky, palette.lavender],
-      accent: ["rgba(255,255,255,0.94)", palette.yellow],
-    },
-    {
-      base: "rgba(227,243,251,0.99)",
-      ramp: ["rgba(252,254,255,0.98)", palette.aqua, palette.sky],
-      accent: ["rgba(255,255,255,0.94)", palette.violet],
+      base: "rgba(222,242,249,0.985)",
+      ramp: [palette.paperWhite, palette.sky, palette.aqua],
+      accents: [
+        palette.yellow,
+        palette.lavender,
+        palette.whiteTint,
+        palette.mintDeep,
+      ],
     },
   ];
 
-  const patternModes = [
-    "horizontal",
-    "vertical",
-    "diagA",
-    "diagB",
-    "corner",
-    "veil",
-    "cross",
-    "band",
+  const patternTypes = [
+    "h-band",
+    "v-band",
+    "diag-a",
+    "diag-b",
+    "crossfade",
+    "corner-bloom",
+    "ribbon",
   ];
 
   function clamp(v, min, max) {
@@ -118,23 +132,33 @@
     targetCtx.scale(dpr, dpr);
   }
 
+  function choosePattern(prevRowPattern, prevColPattern) {
+    const choices = patternTypes.filter(
+      (pattern) => pattern !== prevRowPattern && pattern !== prevColPattern,
+    );
+    return choose(choices.length ? choices : patternTypes);
+  }
+
   function buildTiles() {
     state.tiles = [];
 
-    const idealCell = clamp(Math.round(width / 5.7), 68, 98);
+    const idealCell = clamp(Math.round(width / 5.85), 64, 92);
     const cols = Math.max(4, Math.round(width / idealCell));
     const cell = width / cols;
     const rows = Math.ceil(height / cell) + 1;
     const occupancy = Array.from({ length: rows }, () =>
       Array(cols).fill(false),
     );
+    const patternGrid = Array.from({ length: rows }, () =>
+      Array(cols).fill(null),
+    );
 
     for (let row = 0; row < rows; row += 1) {
       for (let col = 0; col < cols; col += 1) {
         if (occupancy[row][col]) continue;
 
-        const wide = col < cols - 1 && Math.random() < 0.5;
-        const tall = row < rows - 1 && Math.random() < 0.22;
+        const wide = col < cols - 1 && Math.random() < 0.44;
+        const tall = row < rows - 1 && Math.random() < 0.24;
         const spanX = wide ? 2 : 1;
         const spanY = tall ? 2 : 1;
 
@@ -144,38 +168,56 @@
           }
         }
 
-        const x = col * cell + rand(-1.25, 1.25);
-        const y = row * cell + rand(-1.25, 1.25);
-        const w = cell * spanX + rand(-2.2, 2.2);
-        const h = cell * spanY + rand(-2.2, 2.2);
         const family = choose(tileFamilies);
-        const mode = choose(patternModes);
-        const secondaryMode = choose(
-          patternModes.filter((item) => item !== mode),
-        );
+        const prevRowPattern = col > 0 ? patternGrid[row][col - 1] : null;
+        const prevColPattern = row > 0 ? patternGrid[row - 1][col] : null;
+        const pattern = choosePattern(prevRowPattern, prevColPattern);
+
+        for (let ry = row; ry < Math.min(rows, row + spanY); ry += 1) {
+          for (let cx = col; cx < Math.min(cols, col + spanX); cx += 1) {
+            patternGrid[ry][cx] = pattern;
+          }
+        }
+
+        const x = col * cell + rand(-1.1, 1.1);
+        const y = row * cell + rand(-1.1, 1.1);
+        const w = cell * spanX + rand(-1.8, 1.8);
+        const h = cell * spanY + rand(-1.8, 1.8);
+
+        const accentA = choose(family.accents);
+        let accentB = choose(family.accents);
+        if (accentB === accentA) {
+          accentB = choose([
+            palette.violet,
+            palette.lavender,
+            palette.mint,
+            palette.yellow,
+            palette.whiteTint,
+          ]);
+        }
 
         state.tiles.push({
           x,
           y,
           w,
           h,
-          mode,
-          secondaryMode,
+          pattern,
           base: family.base,
           ramp0: family.ramp[0],
           ramp1: family.ramp[1],
           ramp2: family.ramp[2],
-          accent0: family.accent[0],
-          accent1: family.accent[1],
-          fillAlpha: rand(0.965, 0.995),
-          tintAlphaA: rand(0.58, 0.82),
+          accent0: accentA,
+          accent1: accentB,
+          fillAlpha: rand(0.955, 0.992),
+          tintAlphaA: rand(0.52, 0.76),
           tintAlphaB: rand(0.36, 0.62),
-          whiteAlpha: rand(0.34, 0.52),
-          accentAlpha: rand(0.16, 0.36),
-          cloudAlpha: rand(0.22, 0.36),
-          edgeAlpha: rand(0.2, 0.34),
-          brightness: rand(0.96, 1.04),
+          whiteAlpha: rand(0.3, 0.48),
+          accentAlpha: rand(0.2, 0.42),
+          hazeAlpha: rand(0.16, 0.3),
+          edgeAlpha: rand(0.16, 0.26),
           phase: rand(0, Math.PI * 2),
+          pivotX: rand(0.18, 0.82),
+          pivotY: rand(0.18, 0.82),
         });
       }
     }
@@ -185,8 +227,8 @@
       state.tiles[state.tiles.length - 1];
     if (tTile) {
       state.tAnchor = {
-        x: tTile.x + tTile.w * 0.52,
-        y: tTile.y + tTile.h * 0.54,
+        x: tTile.x + tTile.w * 0.54,
+        y: tTile.y + tTile.h * 0.56,
         size: clamp(Math.min(tTile.w, tTile.h) * 0.17, 13, 18),
       };
     }
@@ -198,183 +240,189 @@
       y,
       w,
       h,
-      mode,
+      pattern,
       ramp0,
       ramp1,
       ramp2,
+      accent0,
+      accent1,
       tintAlphaA,
       tintAlphaB,
       whiteAlpha,
     } = tile;
     let grad;
 
-    switch (mode) {
-      case "horizontal":
+    switch (pattern) {
+      case "h-band":
         grad = baseCtx.createLinearGradient(x, y, x, y + h);
+        grad.addColorStop(0, rgbaWithAlpha(ramp1, tintAlphaA));
+        grad.addColorStop(rand(0.24, 0.36), rgbaWithAlpha(ramp0, whiteAlpha));
+        grad.addColorStop(
+          rand(0.48, 0.6),
+          rgbaWithAlpha(accent0, tintAlphaB * 0.85),
+        );
+        grad.addColorStop(1, rgbaWithAlpha(ramp2, tintAlphaB));
         break;
-      case "vertical":
+      case "v-band":
         grad = baseCtx.createLinearGradient(x, y, x + w, y);
+        grad.addColorStop(0, rgbaWithAlpha(ramp2, tintAlphaB));
+        grad.addColorStop(rand(0.22, 0.34), rgbaWithAlpha(ramp0, whiteAlpha));
+        grad.addColorStop(
+          rand(0.58, 0.7),
+          rgbaWithAlpha(accent1, tintAlphaB * 0.8),
+        );
+        grad.addColorStop(1, rgbaWithAlpha(ramp1, tintAlphaA));
         break;
-      case "diagB":
+      case "diag-a":
+        grad = baseCtx.createLinearGradient(x, y, x + w, y + h);
+        grad.addColorStop(0, rgbaWithAlpha(ramp1, tintAlphaA));
+        grad.addColorStop(
+          rand(0.18, 0.26),
+          rgbaWithAlpha(accent0, tintAlphaB * 0.7),
+        );
+        grad.addColorStop(rand(0.46, 0.6), rgbaWithAlpha(ramp0, whiteAlpha));
+        grad.addColorStop(1, rgbaWithAlpha(ramp2, tintAlphaB));
+        break;
+      case "diag-b":
         grad = baseCtx.createLinearGradient(x + w, y, x, y + h);
+        grad.addColorStop(0, rgbaWithAlpha(ramp2, tintAlphaB));
+        grad.addColorStop(rand(0.16, 0.3), rgbaWithAlpha(ramp0, whiteAlpha));
+        grad.addColorStop(
+          rand(0.5, 0.66),
+          rgbaWithAlpha(accent1, tintAlphaB * 0.72),
+        );
+        grad.addColorStop(1, rgbaWithAlpha(ramp1, tintAlphaA));
         break;
-      case "corner":
+      case "crossfade":
         grad = baseCtx.createLinearGradient(
           x,
-          y + h * 0.16,
+          y + h * 0.22,
           x + w,
-          y + h * 0.82,
+          y + h * 0.78,
         );
+        grad.addColorStop(0, rgbaWithAlpha(accent0, tintAlphaB * 0.7));
+        grad.addColorStop(rand(0.26, 0.42), rgbaWithAlpha(ramp1, tintAlphaA));
+        grad.addColorStop(rand(0.56, 0.7), rgbaWithAlpha(ramp0, whiteAlpha));
+        grad.addColorStop(1, rgbaWithAlpha(accent1, tintAlphaB * 0.66));
         break;
-      case "veil":
-        grad = baseCtx.createLinearGradient(
-          x + w * 0.12,
-          y,
-          x + w * 0.88,
-          y + h,
+      case "corner-bloom":
+        grad = baseCtx.createRadialGradient(
+          x + w * tile.pivotX,
+          y + h * tile.pivotY,
+          0,
+          x + w * tile.pivotX,
+          y + h * tile.pivotY,
+          Math.max(w, h) * 0.95,
         );
+        grad.addColorStop(0, rgbaWithAlpha(ramp0, whiteAlpha + 0.04));
+        grad.addColorStop(0.34, rgbaWithAlpha(accent0, tintAlphaB * 0.76));
+        grad.addColorStop(0.68, rgbaWithAlpha(ramp1, tintAlphaA));
+        grad.addColorStop(1, rgbaWithAlpha(ramp2, tintAlphaB * 0.92));
         break;
-      case "cross":
-        grad = baseCtx.createLinearGradient(x, y + h * 0.2, x + w, y + h * 0.8);
-        break;
-      case "band":
-        grad = baseCtx.createLinearGradient(
-          x,
-          y + h * 0.48,
-          x + w,
-          y + h * 0.52,
-        );
-        break;
+      case "ribbon":
       default:
         grad = baseCtx.createLinearGradient(x, y, x + w, y + h);
+        grad.addColorStop(0, rgbaWithAlpha(ramp1, tintAlphaA));
+        grad.addColorStop(rand(0.2, 0.28), rgbaWithAlpha(ramp0, whiteAlpha));
+        grad.addColorStop(
+          rand(0.42, 0.54),
+          rgbaWithAlpha(accent0, tintAlphaB * 0.7),
+        );
+        grad.addColorStop(
+          rand(0.64, 0.78),
+          rgbaWithAlpha(accent1, tintAlphaB * 0.62),
+        );
+        grad.addColorStop(1, rgbaWithAlpha(ramp2, tintAlphaB));
         break;
     }
 
-    grad.addColorStop(0, rgbaWithAlpha(ramp1, tintAlphaA));
-    grad.addColorStop(rand(0.12, 0.22), rgbaWithAlpha(ramp0, whiteAlpha));
-    grad.addColorStop(rand(0.32, 0.48), rgbaWithAlpha(ramp2, tintAlphaB));
-    grad.addColorStop(rand(0.54, 0.7), rgbaWithAlpha(ramp0, whiteAlpha * 0.92));
-    grad.addColorStop(rand(0.78, 0.9), rgbaWithAlpha(ramp1, tintAlphaA * 0.85));
-    grad.addColorStop(1, rgbaWithAlpha(ramp2, tintAlphaB * 0.88));
     return grad;
   }
 
-  function paintSecondaryPattern(tile) {
+  function paintPatternOverlays(tile) {
     const {
       x,
       y,
       w,
       h,
-      secondaryMode,
+      pattern,
       ramp0,
       ramp1,
-      ramp2,
+      accent0,
       accent1,
+      hazeAlpha,
+      whiteAlpha,
       accentAlpha,
-      cloudAlpha,
     } = tile;
-    let grad;
 
-    switch (secondaryMode) {
-      case "horizontal":
-        grad = baseCtx.createLinearGradient(
-          x,
-          y + h * rand(0.18, 0.36),
-          x,
-          y + h * rand(0.68, 0.88),
-        );
-        break;
-      case "vertical":
-        grad = baseCtx.createLinearGradient(
-          x + w * rand(0.18, 0.36),
-          y,
-          x + w * rand(0.68, 0.88),
-          y,
-        );
-        break;
-      case "diagB":
-        grad = baseCtx.createLinearGradient(
-          x + w,
-          y + h * 0.14,
-          x,
-          y + h * 0.86,
-        );
-        break;
-      case "corner":
-        grad = baseCtx.createRadialGradient(
-          x + w * 0.16,
-          y + h * 0.22,
-          0,
-          x + w * 0.16,
-          y + h * 0.22,
-          Math.max(w, h) * 0.86,
-        );
-        grad.addColorStop(0, rgbaWithAlpha(ramp0, cloudAlpha * 0.88));
-        grad.addColorStop(0.34, rgbaWithAlpha(ramp2, cloudAlpha * 0.68));
-        grad.addColorStop(1, "rgba(255,255,255,0)");
-        baseCtx.fillStyle = grad;
-        baseCtx.fillRect(x, y, w, h);
-        return;
-      case "veil":
-        grad = baseCtx.createLinearGradient(x, y, x + w, y + h);
-        break;
-      case "cross":
-        grad = baseCtx.createLinearGradient(
-          x,
-          y + h * 0.52,
-          x + w,
-          y + h * 0.48,
-        );
-        break;
-      case "band":
-        grad = baseCtx.createLinearGradient(x, y + h * 0.5, x, y + h * 0.5);
-        grad.addColorStop(0, "rgba(255,255,255,0)");
-        grad.addColorStop(0.2, rgbaWithAlpha(ramp0, 0.16));
-        grad.addColorStop(0.5, rgbaWithAlpha(accent1, accentAlpha * 0.82));
-        grad.addColorStop(0.8, rgbaWithAlpha(ramp1, 0.15));
-        grad.addColorStop(1, "rgba(255,255,255,0)");
-        baseCtx.fillStyle = grad;
-        baseCtx.fillRect(x, y, w, h);
-        return;
-      default:
-        grad = baseCtx.createLinearGradient(x, y, x + w, y + h);
-        break;
+    if (pattern === "h-band" || pattern === "crossfade") {
+      const bandY = y + h * rand(0.24, 0.72);
+      const band = baseCtx.createLinearGradient(
+        x,
+        bandY - h * 0.18,
+        x,
+        bandY + h * 0.18,
+      );
+      band.addColorStop(0, "rgba(255,255,255,0)");
+      band.addColorStop(0.42, rgbaWithAlpha(ramp0, whiteAlpha * 0.8));
+      band.addColorStop(0.66, rgbaWithAlpha(accent0, accentAlpha * 0.74));
+      band.addColorStop(1, "rgba(255,255,255,0)");
+      baseCtx.fillStyle = band;
+      baseCtx.fillRect(x, y, w, h);
     }
 
-    grad.addColorStop(0, "rgba(255,255,255,0)");
-    grad.addColorStop(
-      rand(0.18, 0.28),
-      rgbaWithAlpha(ramp0, cloudAlpha * 0.88),
-    );
-    grad.addColorStop(
-      rand(0.42, 0.56),
-      rgbaWithAlpha(accent1, accentAlpha * 0.78),
-    );
-    grad.addColorStop(
-      rand(0.62, 0.76),
-      rgbaWithAlpha(ramp2, cloudAlpha * 0.62),
-    );
-    grad.addColorStop(1, "rgba(255,255,255,0)");
-    baseCtx.fillStyle = grad;
-    baseCtx.fillRect(x, y, w, h);
+    if (pattern === "v-band" || pattern === "ribbon") {
+      const bandX = x + w * rand(0.22, 0.78);
+      const band = baseCtx.createLinearGradient(
+        bandX - w * 0.18,
+        y,
+        bandX + w * 0.18,
+        y,
+      );
+      band.addColorStop(0, "rgba(255,255,255,0)");
+      band.addColorStop(0.42, rgbaWithAlpha(ramp1, hazeAlpha));
+      band.addColorStop(0.66, rgbaWithAlpha(ramp0, whiteAlpha * 0.78));
+      band.addColorStop(1, "rgba(255,255,255,0)");
+      baseCtx.fillStyle = band;
+      baseCtx.fillRect(x, y, w, h);
+    }
+
+    if (pattern === "diag-a" || pattern === "diag-b" || pattern === "ribbon") {
+      const diag = baseCtx.createLinearGradient(x, y, x + w, y + h);
+      diag.addColorStop(0, "rgba(255,255,255,0)");
+      diag.addColorStop(0.34, rgbaWithAlpha(ramp0, whiteAlpha * 0.72));
+      diag.addColorStop(0.48, rgbaWithAlpha(accent1, accentAlpha * 0.7));
+      diag.addColorStop(0.64, rgbaWithAlpha(accent0, accentAlpha * 0.66));
+      diag.addColorStop(1, "rgba(255,255,255,0)");
+      baseCtx.fillStyle = diag;
+      baseCtx.fillRect(x, y, w, h);
+    }
+
+    if (pattern === "corner-bloom" || Math.random() < 0.28) {
+      const glowX = x + w * tile.pivotX;
+      const glowY = y + h * tile.pivotY;
+      const radial = baseCtx.createRadialGradient(
+        glowX,
+        glowY,
+        0,
+        glowX,
+        glowY,
+        Math.max(w, h) * rand(0.48, 0.94),
+      );
+      radial.addColorStop(0, rgbaWithAlpha(ramp0, whiteAlpha * 0.86));
+      radial.addColorStop(0.34, rgbaWithAlpha(accent0, accentAlpha * 0.72));
+      radial.addColorStop(0.68, rgbaWithAlpha(accent1, accentAlpha * 0.56));
+      radial.addColorStop(1, "rgba(255,255,255,0)");
+      baseCtx.save();
+      baseCtx.globalCompositeOperation = "screen";
+      baseCtx.fillStyle = radial;
+      baseCtx.fillRect(x, y, w, h);
+      baseCtx.restore();
+    }
   }
 
   function paintTile(tile) {
-    const {
-      x,
-      y,
-      w,
-      h,
-      base,
-      cloudAlpha,
-      edgeAlpha,
-      ramp0,
-      ramp1,
-      ramp2,
-      accent0,
-      accent1,
-      accentAlpha,
-    } = tile;
+    const { x, y, w, h, base, edgeAlpha } = tile;
 
     baseCtx.save();
     baseCtx.globalAlpha = tile.fillAlpha;
@@ -387,49 +435,25 @@
     baseCtx.fillRect(x, y, w, h);
     baseCtx.restore();
 
-    paintSecondaryPattern(tile);
+    paintPatternOverlays(tile);
 
-    const sideSheen = baseCtx.createLinearGradient(
+    const softHaze = baseCtx.createLinearGradient(
       x,
-      y,
-      x + w,
-      y + h * rand(0.06, 0.16),
+      y + h * rand(0.16, 0.3),
+      x,
+      y + h * rand(0.72, 0.9),
     );
-    sideSheen.addColorStop(0, "rgba(255,255,255,0.02)");
-    sideSheen.addColorStop(0.16, rgbaWithAlpha(ramp0, 0.26));
-    sideSheen.addColorStop(0.38, rgbaWithAlpha(ramp1, 0.18));
-    sideSheen.addColorStop(0.62, rgbaWithAlpha(accent1, accentAlpha * 0.82));
-    sideSheen.addColorStop(1, "rgba(255,255,255,0.03)");
-    baseCtx.fillStyle = sideSheen;
-    baseCtx.fillRect(x, y, w, h);
-
-    const glowX = x + w * rand(0.18, 0.82);
-    const glowY = y + h * rand(0.18, 0.82);
-    const radial = baseCtx.createRadialGradient(
-      glowX,
-      glowY,
-      0,
-      glowX,
-      glowY,
-      Math.max(w, h) * rand(0.54, 0.96),
+    softHaze.addColorStop(0, "rgba(255,255,255,0)");
+    softHaze.addColorStop(
+      0.38,
+      rgbaWithAlpha(tile.ramp0, tile.whiteAlpha * 0.66),
     );
-    radial.addColorStop(0, rgbaWithAlpha(accent0, accentAlpha * 0.88));
-    radial.addColorStop(0.34, rgbaWithAlpha(accent1, accentAlpha * 0.76));
-    radial.addColorStop(0.68, rgbaWithAlpha(ramp1, cloudAlpha * 0.32));
-    radial.addColorStop(1, "rgba(255,255,255,0)");
-    baseCtx.save();
-    baseCtx.globalCompositeOperation = "screen";
-    baseCtx.fillStyle = radial;
-    baseCtx.fillRect(x, y, w, h);
-    baseCtx.restore();
-
-    const diagonal = baseCtx.createLinearGradient(x, y, x + w, y + h);
-    diagonal.addColorStop(0, "rgba(255,255,255,0)");
-    diagonal.addColorStop(0.26, rgbaWithAlpha(ramp0, 0.1));
-    diagonal.addColorStop(0.48, rgbaWithAlpha(ramp2, 0.12));
-    diagonal.addColorStop(0.68, rgbaWithAlpha(ramp1, 0.08));
-    diagonal.addColorStop(1, "rgba(255,255,255,0)");
-    baseCtx.fillStyle = diagonal;
+    softHaze.addColorStop(
+      0.58,
+      rgbaWithAlpha(tile.accent1, tile.accentAlpha * 0.52),
+    );
+    softHaze.addColorStop(1, "rgba(255,255,255,0)");
+    baseCtx.fillStyle = softHaze;
     baseCtx.fillRect(x, y, w, h);
 
     baseCtx.save();
@@ -444,7 +468,7 @@
     baseCtx.restore();
 
     baseCtx.save();
-    baseCtx.strokeStyle = rgbaWithAlpha(palette.seamShadow, edgeAlpha * 0.86);
+    baseCtx.strokeStyle = rgbaWithAlpha(palette.seamShadow, edgeAlpha * 0.75);
     baseCtx.lineWidth = 0.8;
     baseCtx.beginPath();
     baseCtx.moveTo(x + 0.5, y + h - 0.5);
@@ -483,14 +507,14 @@
     }
 
     grainCtx.save();
-    grainCtx.globalAlpha = 0.075;
-    for (let i = 0; i < 30; i += 1) {
+    grainCtx.globalAlpha = 0.085;
+    for (let i = 0; i < 32; i += 1) {
       const y = rand(0, height);
       grainCtx.fillStyle =
         Math.random() < 0.55
-          ? "rgba(255,255,255,0.60)"
-          : "rgba(114, 123, 131, 0.34)";
-      grainCtx.fillRect(0, y, width, rand(0.5, 1.15));
+          ? "rgba(255,255,255,0.62)"
+          : "rgba(116, 126, 136, 0.34)";
+      grainCtx.fillRect(0, y, width, rand(0.5, 1.1));
     }
     grainCtx.restore();
   }
@@ -567,7 +591,7 @@
 
     ctx.save();
     ctx.globalCompositeOperation = "screen";
-    ctx.globalAlpha = 0.04;
+    ctx.globalAlpha = 0.06;
     const shift = 0.5 + 0.5 * Math.sin(time * 0.00036);
     const glow = ctx.createLinearGradient(
       width * 0.14,
@@ -575,10 +599,10 @@
       width * 0.86,
       height,
     );
-    glow.addColorStop(0, `rgba(214,240,251,${0.12 + shift * 0.04})`);
-    glow.addColorStop(0.34, `rgba(255,255,255,${0.06 + shift * 0.03})`);
-    glow.addColorStop(0.7, `rgba(207,196,238,${0.08 + (1 - shift) * 0.04})`);
-    glow.addColorStop(1, "rgba(255,255,255,0.08)");
+    glow.addColorStop(0, `rgba(214,240,251,${0.16 + shift * 0.05})`);
+    glow.addColorStop(0.34, `rgba(255,255,255,${0.1 + shift * 0.03})`);
+    glow.addColorStop(0.7, `rgba(207,196,238,${0.12 + (1 - shift) * 0.04})`);
+    glow.addColorStop(1, "rgba(255,255,255,0.10)");
     ctx.fillStyle = glow;
     ctx.fillRect(motion.x * 0.16, motion.y * 0.12, width, height);
     ctx.restore();
