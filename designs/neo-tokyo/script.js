@@ -33,12 +33,12 @@
     darkA: "rgba(8, 18, 28, 0.96)",
     darkB: "rgba(12, 26, 40, 0.92)",
     darkC: "rgba(20, 40, 54, 0.78)",
-    cool: "rgba(112, 215, 245, 0.24)",
-    coolGlow: "rgba(205, 241, 255, 0.16)",
-    warm: "rgba(255, 191, 108, 0.24)",
-    warmGlow: "rgba(255, 229, 182, 0.14)",
-    mint: "rgba(136, 246, 196, 0.24)",
-    mintGlow: "rgba(221, 253, 234, 0.15)",
+    cool: "rgba(112, 215, 245, 0.19)",
+    coolGlow: "rgba(205, 241, 255, 0.11)",
+    warm: "rgba(255, 191, 108, 0.18)",
+    warmGlow: "rgba(255, 229, 182, 0.1)",
+    mint: "rgba(136, 246, 196, 0.18)",
+    mintGlow: "rgba(221, 253, 234, 0.1)",
     aquaText: "rgba(178, 240, 255, 0.95)",
     whiteText: "rgba(245, 251, 255, 0.98)",
   };
@@ -78,7 +78,7 @@
     state.width = window.innerWidth;
     state.height = window.innerHeight;
     const isSmall = Math.min(state.width, state.height) < 680;
-    state.dpr = Math.min(window.devicePixelRatio || 1, isSmall ? 0.9 : 1.0);
+    state.dpr = Math.min(window.devicePixelRatio || 1, isSmall ? 0.78 : 0.92);
 
     canvas.width = Math.round(state.width * state.dpr);
     canvas.height = Math.round(state.height * state.dpr);
@@ -116,10 +116,10 @@
       });
     }
 
-    for (let band = 0; band < 9; band += 1) {
+    for (let band = 0; band < 10; band += 1) {
       const baseX = -0.96 + band * 0.24 + (rand() - 0.5) * 0.08;
       const tilt = -0.34 + (rand() - 0.5) * 0.11;
-      const rows = 34 + Math.floor(rand() * 18);
+      const rows = 30 + Math.floor(rand() * 14);
       for (let i = 0; i < rows; i += 1) {
         const y = -1.12 + i * 0.064 + (rand() - 0.5) * 0.055;
         const pieces = 8 + Math.floor(rand() * 7);
@@ -129,22 +129,26 @@
           const h = 0.008 + rand() * 0.028;
           const gap = 0.004 + rand() * 0.018;
           const roll = rand();
-          let fill = "rgba(26, 44, 60, 0.68)";
-          let glow = "rgba(136, 212, 241, 0.05)";
+          let fill = "rgba(20, 34, 48, 0.62)";
+          let glow = "rgba(136, 212, 241, 0.04)";
           let bright = false;
+          let extraBright = false;
 
           if (roll > 0.55 && roll < 0.78) {
             fill = palette.cool;
             glow = palette.coolGlow;
-            bright = rand() > 0.6;
+            bright = rand() > 0.64;
+            extraBright = rand() > 0.9;
           } else if (roll >= 0.78 && roll < 0.9) {
             fill = palette.warm;
             glow = palette.warmGlow;
             bright = true;
+            extraBright = rand() > 0.84;
           } else if (roll >= 0.9) {
             fill = palette.mint;
             glow = palette.mintGlow;
             bright = true;
+            extraBright = rand() > 0.82;
           }
 
           microTiles.push({
@@ -157,6 +161,7 @@
             fill,
             glow,
             bright,
+            extraBright,
             radius: 0.002 + rand() * 0.009,
           });
           cursor += w + gap;
@@ -177,7 +182,7 @@
       });
     }
 
-    for (let i = 0; i < 20; i += 1) {
+    for (let i = 0; i < 16; i += 1) {
       staticGlows.push({
         x: 0.06 + rand() * 0.88,
         y: 0.1 + rand() * 0.78,
@@ -186,7 +191,7 @@
       });
     }
 
-    for (let i = 0; i < 9; i += 1) {
+    for (let i = 0; i < 7; i += 1) {
       pulses.push({
         x: rand(),
         y: rand(),
@@ -202,9 +207,9 @@
     baseCtx.clearRect(0, 0, cacheWidth, cacheHeight);
 
     const field = baseCtx.createLinearGradient(0, 0, 0, cacheHeight);
-    field.addColorStop(0, "rgba(6, 12, 18, 0.96)");
-    field.addColorStop(0.48, "rgba(11, 19, 28, 0.9)");
-    field.addColorStop(1, "rgba(4, 8, 13, 0.98)");
+    field.addColorStop(0, "rgba(4, 8, 13, 0.985)");
+    field.addColorStop(0.48, "rgba(8, 14, 22, 0.94)");
+    field.addColorStop(1, "rgba(2, 5, 9, 0.995)");
     baseCtx.fillStyle = field;
     baseCtx.fillRect(0, 0, cacheWidth, cacheHeight);
 
@@ -215,10 +220,10 @@
     const size = Math.max(cacheWidth, cacheHeight);
 
     const darkField = baseCtx.createLinearGradient(0, -size, 0, size);
-    darkField.addColorStop(0, palette.darkA);
-    darkField.addColorStop(0.42, palette.darkB);
-    darkField.addColorStop(0.76, palette.darkC);
-    darkField.addColorStop(1, "rgba(8, 18, 28, 0.96)");
+    darkField.addColorStop(0, "rgba(4, 9, 15, 0.985)");
+    darkField.addColorStop(0.42, "rgba(8, 16, 26, 0.95)");
+    darkField.addColorStop(0.76, "rgba(14, 28, 42, 0.82)");
+    darkField.addColorStop(1, "rgba(6, 12, 20, 0.98)");
     baseCtx.fillStyle = darkField;
     baseCtx.fillRect(-size * 1.2, -size * 1.35, size * 2.4, size * 2.7);
 
@@ -235,15 +240,15 @@
       );
       panelGrad.addColorStop(
         0,
-        `rgba(5, 11, 18, ${(0.8 + panel.alpha * 0.08).toFixed(3)})`,
+        `rgba(3, 8, 14, ${(0.88 + panel.alpha * 0.08).toFixed(3)})`,
       );
       panelGrad.addColorStop(
         0.5,
-        `rgba(12, 23, 34, ${(0.6 + panel.alpha * 0.1).toFixed(3)})`,
+        `rgba(8, 16, 26, ${(0.72 + panel.alpha * 0.08).toFixed(3)})`,
       );
       panelGrad.addColorStop(
         1,
-        `rgba(22, 40, 54, ${(0.32 + panel.alpha * 0.08).toFixed(3)})`,
+        `rgba(18, 30, 44, ${(0.36 + panel.alpha * 0.06).toFixed(3)})`,
       );
       baseCtx.save();
       baseCtx.translate(x, y);
@@ -263,7 +268,7 @@
       const h = tile.h * size;
       const fillStyle = tile.fill.replace(
         /,\s*[0-9.]+\)$/,
-        `, ${(tile.alpha * (tile.bright ? 1 : 0.85)).toFixed(3)})`,
+        `, ${(tile.alpha * (tile.extraBright ? 1.02 : tile.bright ? 0.72 : 0.8)).toFixed(3)})`,
       );
       baseCtx.save();
       baseCtx.translate(x, y);
@@ -274,8 +279,14 @@
 
       if (tile.bright) {
         baseCtx.shadowColor = tile.glow;
-        baseCtx.shadowBlur = Math.max(8, size * 0.012);
-        baseCtx.fillStyle = tile.glow.replace(/,\s*[0-9.]+\)$/, ", 0.18)");
+        baseCtx.shadowBlur = Math.max(
+          7,
+          size * (tile.extraBright ? 0.012 : 0.008),
+        );
+        baseCtx.fillStyle = tile.glow.replace(
+          /,\s*[0-9.]+\)$/,
+          tile.extraBright ? ", 0.2)" : ", 0.11)",
+        );
         roundedRect(
           baseCtx,
           -w * 0.44,
@@ -399,14 +410,14 @@
     const s2 = 0.5 + 0.5 * Math.sin(phase + 1.8);
     const s3 = 0.5 + 0.5 * Math.sin(phase + 3.7);
 
-    const whiteAlpha = (0.23 + s1 * 0.22) * scale;
-    const blueAlpha = (0.1 + s2 * 0.16) * scale;
-    const mintAlpha = (0.05 + s3 * 0.12) * scale;
+    const whiteAlpha = (0.34 + s1 * 0.26) * scale;
+    const blueAlpha = (0.07 + s2 * 0.14) * scale;
+    const mintAlpha = (0.035 + s3 * 0.09) * scale;
 
     return [
-      `rgba(${Math.round(246 + s1 * 6)}, ${Math.round(250 + s1 * 5)}, 255, ${whiteAlpha.toFixed(3)})`,
-      `rgba(${Math.round(206 + s2 * 24)}, ${Math.round(235 + s2 * 16)}, ${Math.round(255 - s3 * 3)}, ${blueAlpha.toFixed(3)})`,
-      `rgba(${Math.round(210 + s3 * 10)}, ${Math.round(246 + s3 * 8)}, ${Math.round(231 + s3 * 10)}, ${mintAlpha.toFixed(3)})`,
+      `rgba(${Math.round(250 + s1 * 4)}, ${Math.round(252 + s1 * 3)}, 255, ${whiteAlpha.toFixed(3)})`,
+      `rgba(${Math.round(220 + s2 * 18)}, ${Math.round(240 + s2 * 12)}, ${Math.round(255 - s3 * 2)}, ${blueAlpha.toFixed(3)})`,
+      `rgba(${Math.round(223 + s3 * 8)}, ${Math.round(249 + s3 * 6)}, ${Math.round(236 + s3 * 8)}, ${mintAlpha.toFixed(3)})`,
     ];
   }
 
@@ -450,17 +461,17 @@
         state.height * pulse.y +
         state.currentY * 0.058 +
         Math.cos(state.time * pulse.speed * 0.85 + pulse.phase) * 18;
-      const radius = Math.max(state.width, state.height) * pulse.size;
+      const radius = Math.max(state.width, state.height) * pulse.size * 0.92;
       const radial = ctx.createRadialGradient(x, y, 0, x, y, radius);
       if (pulse.type === "warm") {
-        radial.addColorStop(0, "rgba(255, 228, 172, 0.18)");
-        radial.addColorStop(0.5, "rgba(255, 173, 83, 0.08)");
+        radial.addColorStop(0, "rgba(255, 228, 172, 0.14)");
+        radial.addColorStop(0.5, "rgba(255, 173, 83, 0.06)");
       } else if (pulse.type === "mint") {
-        radial.addColorStop(0, "rgba(222, 255, 232, 0.16)");
-        radial.addColorStop(0.5, "rgba(128, 242, 185, 0.08)");
+        radial.addColorStop(0, "rgba(222, 255, 232, 0.13)");
+        radial.addColorStop(0.5, "rgba(128, 242, 185, 0.055)");
       } else {
-        radial.addColorStop(0, "rgba(206, 242, 255, 0.14)");
-        radial.addColorStop(0.5, "rgba(118, 214, 243, 0.08)");
+        radial.addColorStop(0, "rgba(206, 242, 255, 0.12)");
+        radial.addColorStop(0.5, "rgba(118, 214, 243, 0.055)");
       }
       radial.addColorStop(1, "rgba(255,255,255,0)");
       ctx.fillStyle = radial;
@@ -472,12 +483,12 @@
   function drawOverlayVeils() {
     const overlayX = state.currentX * 0.58;
     const overlayY = state.currentY * 0.44;
-    const phase = state.time * 1.08;
+    const phase = state.time * 1.22;
 
     ctx.save();
     ctx.globalCompositeOperation = "screen";
 
-    for (let i = 0; i < 5; i += 1) {
+    for (let i = 0; i < 4; i += 1) {
       const px = state.width * (0.12 + i * 0.18) + overlayX * (0.9 + i * 0.16);
       const wave1 =
         Math.sin(state.time * (0.46 + i * 0.08) + i * 0.8) *
@@ -487,8 +498,8 @@
         Math.cos(state.time * (0.38 + i * 0.06) + i * 1.15) *
         state.width *
         (0.03 + i * 0.005);
-      const ribbonWidth = state.width * (0.17 + i * 0.04);
-      const stops = overlayStops(phase + i * 0.68, 1.1 - i * 0.08);
+      const ribbonWidth = state.width * (0.22 + i * 0.045);
+      const stops = overlayStops(phase + i * 0.68, 1.14 - i * 0.09);
       const grad = ctx.createLinearGradient(
         px - ribbonWidth,
         0,
@@ -524,8 +535,8 @@
       ctx.closePath();
       ctx.fill();
 
-      ctx.strokeStyle = `rgba(246, 252, 255, ${(0.032 - i * 0.004).toFixed(3)})`;
-      ctx.lineWidth = Math.max(1, state.width * 0.0012);
+      ctx.strokeStyle = `rgba(246, 252, 255, ${(0.012 - i * 0.0015).toFixed(3)})`;
+      ctx.lineWidth = Math.max(1, state.width * 0.00105);
       ctx.beginPath();
       ctx.moveTo(px - ribbonWidth * 0.04, -state.height * 0.08);
       ctx.bezierCurveTo(
@@ -539,18 +550,18 @@
       ctx.stroke();
     }
 
-    for (let i = 0; i < 12; i += 1) {
+    for (let i = 0; i < 10; i += 1) {
       const rx =
         state.width * (0.08 + i * 0.074) + overlayX * (0.96 + (i % 3) * 0.18);
       const ry =
         state.height * (0.12 + (i % 6) * 0.12) +
         overlayY * (0.82 + (i % 4) * 0.12);
-      const r = Math.max(state.width, state.height) * (0.06 + (i % 4) * 0.018);
+      const r = Math.max(state.width, state.height) * (0.085 + (i % 4) * 0.022);
       const stops = overlayStops(phase + i * 0.42, 1.0);
       const radial = ctx.createRadialGradient(rx, ry, 0, rx, ry, r);
       radial.addColorStop(0, stops[0]);
-      radial.addColorStop(0.3, stops[1]);
-      radial.addColorStop(0.64, stops[2]);
+      radial.addColorStop(0.34, stops[1]);
+      radial.addColorStop(0.7, stops[2]);
       radial.addColorStop(1, "rgba(255,255,255,0)");
       ctx.fillStyle = radial;
       ctx.fillRect(rx - r, ry - r, r * 2, r * 2);
@@ -584,8 +595,8 @@
     tg.addColorStop(0.45, palette.aquaText);
     tg.addColorStop(1, "rgba(215, 247, 255, 0.96)");
     ctx.fillStyle = tg;
-    ctx.shadowColor = "rgba(190, 241, 255, 0.42)";
-    ctx.shadowBlur = 22;
+    ctx.shadowColor = "rgba(192, 244, 255, 0.52)";
+    ctx.shadowBlur = 24;
     ctx.fillText("t", 0, 0);
     ctx.shadowBlur = 0;
     ctx.lineWidth = Math.max(1, state.width * 0.0012);
