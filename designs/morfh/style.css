@@ -1,6 +1,6 @@
 :root {
   color-scheme: light;
-  --paper: #eff4f2;
+  --paper: #edf4f1;
   --paper-edge: rgba(255, 255, 255, 0.6);
 }
 
@@ -33,15 +33,15 @@ body {
   background:
     radial-gradient(
       circle at 16% 12%,
-      rgba(255, 255, 255, 0.9),
+      rgba(255, 255, 255, 0.72),
       rgba(255, 255, 255, 0) 34%
     ),
     radial-gradient(
       circle at 78% 24%,
-      rgba(236, 244, 247, 0.44),
+      rgba(230, 239, 244, 0.32),
       rgba(236, 244, 247, 0) 28%
     ),
-    linear-gradient(180deg, #f1f6f4 0%, #edf3f1 100%);
+    linear-gradient(180deg, #eef5f2 0%, #e8efed 100%);
 }
 
 #morfh-canvas {
@@ -59,15 +59,15 @@ body {
     radial-gradient(
       circle at 50% 44%,
       rgba(255, 255, 255, 0),
-      rgba(244, 248, 247, 0.12) 56%,
-      rgba(224, 232, 231, 0.2) 100%
+      rgba(244, 248, 247, 0.08) 56%,
+      rgba(224, 232, 231, 0.16) 100%
     ),
     linear-gradient(
       90deg,
-      rgba(255, 255, 255, 0.12),
+      rgba(255, 255, 255, 0.08),
       rgba(255, 255, 255, 0) 16%,
       rgba(255, 255, 255, 0) 84%,
-      rgba(255, 255, 255, 0.1)
+      rgba(255, 255, 255, 0.08)
     );
   mix-blend-mode: screen;
 }
