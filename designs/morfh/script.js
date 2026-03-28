@@ -234,6 +234,13 @@
   function buildTiles() {
     state.tiles = [];
 
+    state.tAnchor = {
+      x: rand(width * 0.12, width * 0.88),
+      y: rand(height * 0.12, height * 0.76),
+      size: clamp(Math.min(width, height) * 0.05, 16, 20),
+      pulse: rand(0, Math.PI * 2),
+    };
+
     const idealCell = clamp(Math.round(Math.min(width, height) / 5.3), 72, 108);
     const cols = Math.max(4, Math.round(width / idealCell));
     const cell = width / cols;
@@ -294,17 +301,6 @@
           }
         }
       }
-    }
-
-    const tTile =
-      state.tiles[Math.floor(state.tiles.length * 0.62)] ||
-      state.tiles[state.tiles.length - 1];
-    if (tTile) {
-      state.tAnchor = {
-        x: tTile.x + tTile.w * 0.5,
-        y: tTile.y + tTile.h * 0.54,
-        size: clamp(Math.min(tTile.w, tTile.h) * 0.17, 13, 18),
-      };
     }
   }
 
@@ -621,11 +617,16 @@
   function maybeAddAutoRipple(time) {
     if (pointer.active) return;
     if (time < state.autoRippleTime) return;
-    addRipple(
-      rand(width * 0.18, width * 0.82),
-      rand(height * 0.16, height * 0.84),
-      rand(0.28, 0.52),
-    );
+
+    let rx = rand(width * 0.18, width * 0.82);
+    let ry = rand(height * 0.16, height * 0.84);
+
+    if (state.tAnchor && Math.random() < 0.32) {
+      rx = clamp(state.tAnchor.x + rand(-38, 38), width * 0.12, width * 0.88);
+      ry = clamp(state.tAnchor.y + rand(-38, 38), height * 0.12, height * 0.84);
+    }
+
+    addRipple(rx, ry, rand(0.28, 0.52));
     state.autoRippleTime = time + rand(700, 1500);
   }
 
@@ -796,31 +797,46 @@
   }
 
   function drawT(time) {
-    if (!state.tAnchor) return;
+    if (!state.tAnchor || !state.ripples.length) return;
 
-    const driftX = motion.x * 0.14;
-    const driftY = motion.y * 0.12;
-    const pulse = 0.5 + 0.5 * Math.sin(time * 0.00045);
-    const alphaBase = 0.3 + pulse * 0.05;
+    let strength = 0;
+    for (const ripple of state.ripples) {
+      const dx = state.tAnchor.x - ripple.x;
+      const dy = state.tAnchor.y - ripple.y;
+      const dist = Math.hypot(dx, dy);
+
+      const ringCenter = ripple.r + ripple.thickness * 0.36;
+      const ringWidth = ripple.thickness * 0.96;
+      const ringHit = 1 - Math.abs(dist - ringCenter) / ringWidth;
+      const glowHit = 1 - dist / (ripple.r + ripple.thickness * 0.85);
+      const local = Math.max(ringHit * 0.95, glowHit * 0.28, 0) * ripple.alpha;
+      if (local > strength) strength = local;
+    }
+
+    if (strength < 0.018) return;
+
+    const pulse = 0.5 + 0.5 * Math.sin(time * 0.0012 + state.tAnchor.pulse);
+    const alpha = clamp(strength * 5.4 + pulse * 0.08, 0.14, 0.88);
+    const driftX = Math.sin(time * 0.001 + state.tAnchor.pulse) * 0.6;
+    const driftY = Math.cos(time * 0.0011 + state.tAnchor.pulse) * 0.5;
 
     ctx.save();
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.font = `600 ${state.tAnchor.size}px "Helvetica Neue", Arial, sans-serif`;
-    ctx.fillStyle = `rgba(255,255,255,${alphaBase})`;
+    ctx.font = `600 ${state.tAnchor.size}px "Avenir Next", "Helvetica Neue", Arial, sans-serif`;
+
+    ctx.shadowColor = `rgba(248, 252, 255, ${alpha * 0.36})`;
+    ctx.shadowBlur = 8;
+    ctx.fillStyle = `rgba(242, 250, 255, ${alpha * 0.42})`;
+    ctx.fillText(
+      "t",
+      state.tAnchor.x + driftX + 0.7,
+      state.tAnchor.y + driftY + 0.2,
+    );
+
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = `rgba(122, 201, 246, ${alpha})`;
     ctx.fillText("t", state.tAnchor.x + driftX, state.tAnchor.y + driftY);
-    ctx.fillStyle = `rgba(194, 230, 247, ${0.24 + pulse * 0.04})`;
-    ctx.fillText(
-      "t",
-      state.tAnchor.x + driftX + 1.0,
-      state.tAnchor.y + driftY - 0.5,
-    );
-    ctx.fillStyle = `rgba(200, 190, 238, ${0.15 + pulse * 0.03})`;
-    ctx.fillText(
-      "t",
-      state.tAnchor.x + driftX - 0.9,
-      state.tAnchor.y + driftY + 0.9,
-    );
     ctx.restore();
   }
 
